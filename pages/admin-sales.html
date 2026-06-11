@@ -119,14 +119,14 @@
   <div class="toast-container" id="toast-container"></div>
 
   <script type="module">
-    import { protectRoute, getCurrentUser, logout } from '../js/auth.js';
-    import { initTheme } from '../js/theme.js';
-    import { Store } from '../js/store.js';
-    import { updateOrderStatus } from '../js/checkout.js';
-    import { formatCurrency, formatDate, sanitizeHTML, showToast } from '../js/utils.js';
+  import { protectRoute, getCurrentUser, logout } from '../js/auth.js';
+  import { initTheme } from '../js/theme.js';
+  import { Store } from '../js/store.js';
+  import { updateOrderStatus } from '../js/checkout.js';
+  import { formatCurrency, formatDate, sanitizeHTML, showToast } from '../js/utils.js';
 
-    protectRoute('admin');
-    initTheme();
+  protectRoute('admin');
+  initTheme();
 
     const user = getCurrentUser();
     document.getElementById('admin-name').textContent = user?.name || 'Admin';

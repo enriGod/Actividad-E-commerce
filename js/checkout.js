@@ -23,22 +23,7 @@ import { isOnline, addToOfflineQueue } from './offline.js';
  */
 export function validateCardNumber(number) {
   const digits = String(number).replace(/\D/g, '');
-  if (digits.length < 13 || digits.length > 19) return false;
-
-  let sum = 0;
-  let shouldDouble = false;
-
-  for (let i = digits.length - 1; i >= 0; i--) {
-    let d = parseInt(digits[i], 10);
-    if (shouldDouble) {
-      d *= 2;
-      if (d > 9) d -= 9;
-    }
-    sum += d;
-    shouldDouble = !shouldDouble;
-  }
-
-  return sum % 10 === 0;
+  return digits.length >= 13 && digits.length <= 19;
 }
 
 /**
@@ -51,13 +36,16 @@ export function validateExpiry(expiry) {
   const match = /^(0[1-9]|1[0-2])\/(\d{2})$/.exec(expiry?.trim());
   if (!match) return false;
 
-  const month = parseInt(match[1], 10);
+  const month = parseInt(match[1], 10); // 1-12
   const year  = parseInt(match[2], 10) + 2000;
 
-  const now      = new Date();
-  const expDate  = new Date(year, month); // 1st of month AFTER expiry
+  const now = new Date();
+  const currentYear  = now.getFullYear();
+  const currentMonth = now.getMonth() + 1; // getMonth() es 0-indexed
 
-  return expDate > now;
+  if (year < currentYear) return false;
+  if (year === currentYear && month < currentMonth) return false;
+  return true;
 }
 
 /**

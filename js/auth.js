@@ -177,19 +177,22 @@ export function isClient() {
  */
 export function protectRoute(requiredRole) {
   const user = getCurrentUser();
+  const isInPages = window.location.pathname.includes('/pages/');
 
   if (!user) {
-    // Determine correct relative path to login page
-    const isInPages = window.location.pathname.includes('/pages/');
+    // Ocultar contenido sensible antes de que el navegador lo pinte
+    document.documentElement.style.visibility = 'hidden';
     window.location.href = isInPages ? 'login.html' : 'pages/login.html';
-    return;
+    return false; // <-- señal para que la página detenga su init
   }
 
   if (requiredRole && user.role !== requiredRole) {
-    // Not authorised — send to homepage
-    const isInPages = window.location.pathname.includes('/pages/');
+    document.documentElement.style.visibility = 'hidden';
     window.location.href = isInPages ? '../index.html' : 'index.html';
+    return false;
   }
+
+  return true;
 }
 
 /* ───────────── Profile Management ───────────── */
@@ -303,8 +306,7 @@ export function updateUserMenu() {
       </div>
       <div class="user-dropdown-divider"></div>
       <a href="${pagesPrefix}profile.html" class="user-dropdown-item">👤 Mi Perfil</a>
-      <a href="${pagesPrefix}orders.html" class="user-dropdown-item">📦 Mis Pedidos</a>
-      ${user.role === 'admin' ? `<a href="${pagesPrefix}admin.html" class="user-dropdown-item">⚙️ Admin Panel</a>` : ''}
+      ${user.role === 'admin' ? `<a href="${pagesPrefix}admin-dashboard.html" class="user-dropdown-item">⚙️ Admin Panel</a>` : ''}
       <div class="user-dropdown-divider"></div>
       <button class="user-dropdown-item user-dropdown-logout" id="logout-btn">🚪 Cerrar Sesión</button>
     `;
@@ -359,11 +361,11 @@ function autoSetup() {
     if (btn && dropdown) {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        dropdown.classList.toggle('active');
+        dropdown.classList.toggle('open');
       });
       // Close when clicking elsewhere
       document.addEventListener('click', () => {
-        dropdown.classList.remove('active');
+        dropdown.classList.remove('open');
       });
     }
 

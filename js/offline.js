@@ -59,13 +59,25 @@ export async function processOfflineQueue() {
 
   console.info(`[Offline] Processing ${queue.length} queued action(s)…`);
 
+  // Limpiar PRIMERO para evitar reprocesamiento si algo falla a medias
+  Store.setOfflineQueue([]);
+
+  let processed = 0;
   for (const action of queue) {
     try {
       switch (action.type) {
         case 'create-order': {
-          // Orders are already persisted locally; nothing extra to do
-          // unless a server sync endpoint existed.
-          console.info('[Offline] Order synced:', action.data?.id);
+          // La orden ya fue persistida en Store.getOrders() al crearse.
+          // Aquí confirmamos que efectivamente existe (no se perdió).
+          const orders = Store.getOrders();
+          const exists = orders.some((o) => o.id === action.data?.id);
+          if (!exists && action.data) {
+            // Restaurar la orden si se perdió de alguna manera
+            orders.push(action.data);
+            Store.setOrders(orders);
+          }
+          console.info('[Offline] Order confirmed:', action.data?.id);
+          processed++;
           break;
         }
         default:
@@ -76,9 +88,9 @@ export async function processOfflineQueue() {
     }
   }
 
-  // Clear queue after processing
-  Store.setOfflineQueue([]);
-  showToast(`${queue.length} acción(es) sincronizada(s) correctamente`, 'success');
+  if (processed > 0) {
+    showToast(`${processed} pedido(s) sincronizado(s) correctamente`, 'success');
+  }
 }
 
 /* ───────────── Init ───────────── */

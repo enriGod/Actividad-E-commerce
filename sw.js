@@ -1,4 +1,4 @@
-const CACHE_NAME = 'emarket-v1';
+const CACHE_NAME = 'emarket-v8';
 const STATIC_ASSETS = [
   '/',
   '/index.html',

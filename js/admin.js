@@ -129,8 +129,11 @@ export function getSalesMetrics() {
   const totalUsers    = users.length;
 
   // "Active" = users who logged in within the last 24 h
-  const oneDayAgo = new Date(Date.now() - 86400000).toISOString();
-  const activeUsers = users.filter((u) => u.lastLogin && u.lastLogin >= oneDayAgo).length;
+  const oneDayAgo = Date.now() - 86400000;
+  const activeUsers = users.filter((u) => {
+    if (!u.lastLogin) return false;
+  return new Date(u.lastLogin).getTime() >= oneDayAgo;
+  }).length;
 
   return { totalRevenue, totalOrders, totalProducts, totalUsers, activeUsers };
 }

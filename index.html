@@ -113,39 +113,23 @@
     </div>
   </section>
 
-  <!-- ═══════════════════════ FEATURED PRODUCTS ═══════════════════════ -->
-  <section class="featured-section section" id="featured-section">
+  <!-- ═══════════════════════ PRODUCTOS DESTACADOS ═══════════════════════ -->
+<section class="featured-section section" id="featured-section">
     <div class="container">
       <h2 class="section-title animate-slide-up">Productos Destacados</h2>
-      <div class="products-grid" id="featured-products">
-        <!-- Skeleton loaders shown until JS populates -->
-        <div class="product-card skeleton-card">
-          <div class="skeleton skeleton-img"></div>
-          <div class="skeleton skeleton-text skeleton-title"></div>
-          <div class="skeleton skeleton-text skeleton-price"></div>
-          <div class="skeleton skeleton-btn"></div>
-        </div>
-        <div class="product-card skeleton-card">
-          <div class="skeleton skeleton-img"></div>
-          <div class="skeleton skeleton-text skeleton-title"></div>
-          <div class="skeleton skeleton-text skeleton-price"></div>
-          <div class="skeleton skeleton-btn"></div>
-        </div>
-        <div class="product-card skeleton-card">
-          <div class="skeleton skeleton-img"></div>
-          <div class="skeleton skeleton-text skeleton-title"></div>
-          <div class="skeleton skeleton-text skeleton-price"></div>
-          <div class="skeleton skeleton-btn"></div>
-        </div>
-        <div class="product-card skeleton-card">
-          <div class="skeleton skeleton-img"></div>
-          <div class="skeleton skeleton-text skeleton-title"></div>
-          <div class="skeleton skeleton-text skeleton-price"></div>
-          <div class="skeleton skeleton-btn"></div>
-        </div>
+      <p class="section-subtitle animate-slide-up" style="text-align:center;margin-bottom:2.5rem">
+        Los favoritos y mejor calificados por nuestros clientes
+      </p>
+      
+      <div class="catalog-grid" id="featured-grid">
+        <div class="card card-product skeleton-card"><div class="skeleton" style="height:200px"></div><div style="padding:1rem"><div class="skeleton" style="height:20px;margin-bottom:0.5rem"></div><div class="skeleton" style="height:16px;width:60%"></div></div></div>
+        <div class="card card-product skeleton-card"><div class="skeleton" style="height:200px"></div><div style="padding:1rem"><div class="skeleton" style="height:20px;margin-bottom:0.5rem"></div><div class="skeleton" style="height:16px;width:60%"></div></div></div>
+        <div class="card card-product skeleton-card"><div class="skeleton" style="height:200px"></div><div style="padding:1rem"><div class="skeleton" style="height:20px;margin-bottom:0.5rem"></div><div class="skeleton" style="height:16px;width:60%"></div></div></div>
+        <div class="card card-product skeleton-card"><div class="skeleton" style="height:200px"></div><div style="padding:1rem"><div class="skeleton" style="height:20px;margin-bottom:0.5rem"></div><div class="skeleton" style="height:16px;width:60%"></div></div></div>
       </div>
-      <div class="section-cta animate-slide-up">
-        <a href="pages/catalog.html" class="btn btn-outline btn-lg">Ver todo el catálogo →</a>
+      
+      <div class="section-cta animate-slide-up" style="text-align:center;margin-top:2rem">
+        <a href="pages/catalog.html" class="btn btn-secondary btn-lg">Ver todo el catálogo →</a>
       </div>
     </div>
   </section>
@@ -269,14 +253,14 @@
 
   <!-- ═══════════════════════ JS MODULES ═══════════════════════ -->
   <script type="module">
-    import { initTheme } from './js/theme.js';
+   import { initTheme } from './js/theme.js';
     import { updateCartBadge, updateUserMenu } from './js/auth.js';
     import { initOfflineDetection, registerServiceWorker } from './js/offline.js';
     import { initializeProducts } from './js/api.js';
     import { Store } from './js/store.js';
-    import { renderProductCard } from './js/products.js';
-    import { showToast } from './js/utils.js';
-    import { addToCart } from './js/cart.js';
+    import { renderProductCard } from './js/products.js'; // Importante para renderizar la tarjeta
+    import { addToCart } from './js/cart.js'; // Importante para que funcione el botón de agregar
+    import { showToast, sanitizeHTML } from './js/utils.js';
 
     /* ── Initialisation ────────────────────────────────────── */
     initTheme();
@@ -286,31 +270,62 @@
     registerServiceWorker();
     Store.initDefaultAdmin();
 
-    /* ── Featured Products ─────────────────────────────────── */
-    async function loadFeatured() {
+    /* ── Category icons map ────────────────────────────────── */
+    const categoryIcons = {
+      "electronics": { icon: "💻", color: "#06b6d4" },
+      "jewelery": { icon: "💎", color: "#ec4899" },
+      "men's clothing": { icon: "👔", color: "#7c3aed" },
+      "women's clothing": { icon: "👗", color: "#f59e0b" },
+    };
+
+    const defaultIcon = { icon: "📦", color: "#10b981" };
+
+    /* ── Load Featured Products ────────────────────────────── */
+    async function loadFeaturedProducts() {
       await initializeProducts();
       const products = Store.getProducts();
-      const featured = [...products].sort((a, b) => b.rating - a.rating).slice(0, 4);
-      const container = document.getElementById('featured-products');
+      const container = document.getElementById('featured-grid');
 
-      if (featured.length) {
-        container.innerHTML = featured.map((p, i) =>
+      // Ordenar productos por calificación (de mayor a menor) y tomar los primeros 4
+      const topProducts = [...products]
+        .sort((a, b) => (b.rating || 0) - (a.rating || 0))
+        .slice(0, 4);
+
+      if (topProducts.length) {
+        // Renderizar las tarjetas
+        container.innerHTML = topProducts.map((p, i) => 
           `<div class="animate-slide-up stagger-${i + 1}">${renderProductCard(p)}</div>`
         ).join('');
 
-        // Wire up add-to-cart buttons
+        // Añadir el evento al botón "Agregar" de cada tarjeta
         container.querySelectorAll('.btn-add-cart').forEach(btn => {
           btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             const id = parseInt(e.currentTarget.dataset.productId);
-            const product = products.find(p => p.id === id);
-            if (product) addToCart(product);
+            const product = products.find(pr => pr.id === id);
+            if (product) { 
+              addToCart(product); 
+              updateCartBadge(); 
+            }
           });
         });
+
+        // Hacer que hacer clic en la tarjeta te lleve al detalle del producto
+        container.querySelectorAll('.card-product').forEach(card => {
+          card.addEventListener('click', (e) => {
+            if (e.target.closest('.btn-add-cart')) return; 
+            const id = card.dataset.productId;
+            window.location.href = `pages/product.html?id=${id}`;
+          });
+          card.style.cursor = 'pointer';
+        });
+
       } else {
-        container.innerHTML = '<p class="empty-state">No se pudieron cargar los productos</p>';
+        container.innerHTML = '<p class="empty-state" style="grid-column: 1/-1;">No se pudieron cargar los productos destacados</p>';
       }
     }
-    loadFeatured();
+    loadFeaturedProducts();
 
     /* ── Newsletter Subscription ───────────────────────────── */
     document.getElementById('newsletter-form')?.addEventListener('submit', (e) => {

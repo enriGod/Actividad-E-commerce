@@ -44,11 +44,13 @@ export function addToCart(product, quantity = 1) {
       title: product.title,
       price: product.price,
       image: product.image,
+      category: product.category || '',
       quantity,
     });
   }
 
   Store.setCart(cart);
+  Store.emit('cart-updated');
   showToast(`${sanitizeHTML(product.title)} agregado al carrito`, 'success');
 }
 
@@ -61,6 +63,7 @@ export function addToCart(product, quantity = 1) {
 export function removeFromCart(productId) {
   const cart = getCart().filter((item) => item.productId !== productId);
   Store.setCart(cart);
+  Store.emit('cart-updated');
   showToast('Producto eliminado del carrito', 'info');
 }
 
@@ -78,6 +81,7 @@ export function updateQuantity(productId, quantity) {
 
   item.quantity = Math.max(1, Math.floor(quantity));
   Store.setCart(cart);
+  Store.emit('cart-updated');
 }
 
 /**
@@ -91,6 +95,7 @@ export function increaseQuantity(productId) {
 
   item.quantity += 1;
   Store.setCart(cart);
+  Store.emit('cart-updated');
 }
 
 /**
@@ -109,6 +114,7 @@ export function decreaseQuantity(productId) {
     return;
   }
   Store.setCart(cart);
+  Store.emit('cart-updated');
 }
 
 /**
@@ -122,6 +128,7 @@ export function cloneItem(productId) {
 
   item.quantity += 1;
   Store.setCart(cart);
+  Store.emit('cart-updated');
   showToast('Producto duplicado en el carrito', 'info');
 }
 
@@ -130,6 +137,7 @@ export function cloneItem(productId) {
 /** Empty the entire cart. */
 export function clearCart() {
   Store.setCart([]);
+  Store.emit('cart-updated');
   showToast('Carrito vaciado', 'info');
 }
 

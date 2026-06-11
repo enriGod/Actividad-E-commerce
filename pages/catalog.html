@@ -63,53 +63,79 @@
       <div class="catalog-layout">
         <!-- Sidebar Filters -->
         <aside class="catalog-sidebar" id="catalog-sidebar">
-          <div class="sidebar-header">
-            <h3>Filtros</h3>
-            <button class="btn btn-sm btn-secondary" id="clear-filters">Limpiar</button>
-          </div>
-
-          <!-- Search -->
-          <div class="filter-group">
-            <label class="filter-label">🔍 Buscar</label>
-            <input type="search" class="input search-bar" id="search-input" placeholder="Buscar productos...">
-          </div>
-
-          <!-- Categories -->
-          <div class="filter-group">
-            <label class="filter-label">📂 Categorías</label>
-            <div class="category-chips" id="category-filters">
-              <!-- JS populates -->
+          <div class="filter-panel">
+            <div class="filter-panel-title">
+              <span>⚙️ Filtros</span>
+              <button class="filter-clear" id="clear-filters">Limpiar todo</button>
             </div>
-          </div>
 
-          <!-- Price Range -->
-          <div class="filter-group">
-            <label class="filter-label">💰 Rango de Precio</label>
-            <div class="price-range">
-              <input type="number" class="input" id="price-min" placeholder="Mín" min="0" step="0.01">
-              <span class="price-separator">—</span>
-              <input type="number" class="input" id="price-max" placeholder="Máx" min="0" step="0.01">
+            <!-- Search -->
+            <div class="filter-group">
+              <div class="filter-group-header">
+                <span class="filter-group-title">🔍 Búsqueda</span>
+              </div>
+              <div class="filter-group-body">
+                <div class="search-bar">
+                  <span class="search-icon">🔍</span>
+                  <input type="search" class="input" id="search-input" placeholder="Buscar productos...">
+                </div>
+              </div>
             </div>
-            <button class="btn btn-sm btn-primary" id="apply-price" style="margin-top:0.5rem;width:100%">Aplicar</button>
+
+            <!-- Categories -->
+            <div class="filter-group">
+              <div class="filter-group-header">
+                <span class="filter-group-title">📂 Categorías</span>
+              </div>
+              <div class="filter-group-body">
+                <div class="category-chips" id="category-filters">
+                  <!-- JS populates -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Price Range -->
+            <div class="filter-group">
+              <div class="filter-group-header">
+                <span class="filter-group-title">💰 Rango de Precio</span>
+              </div>
+              <div class="filter-group-body">
+                <div class="price-range">
+                  <input type="number" class="input" id="price-min" placeholder="$ Mín" min="0" step="0.01">
+                  <span class="price-range-separator">—</span>
+                  <input type="number" class="input" id="price-max" placeholder="$ Máx" min="0" step="0.01">
+                </div>
+                <button class="btn btn-primary btn-sm btn-block" id="apply-price" style="margin-top:var(--space-3)">Aplicar Precio</button>
+              </div>
+            </div>
+
+            <!-- Sort (inside filter panel too) -->
+            <div class="filter-group" style="border-bottom:none;padding-bottom:0;margin-bottom:0">
+              <div class="filter-group-header">
+                <span class="filter-group-title">📊 Ordenar por</span>
+              </div>
+              <div class="filter-group-body">
+                <select class="input" id="sort-select" style="cursor:pointer">
+                  <option value="relevant">⭐ Más relevantes</option>
+                  <option value="price-asc">💲 Precio: menor a mayor</option>
+                  <option value="price-desc">💰 Precio: mayor a menor</option>
+                  <option value="name-asc">🔤 Nombre A-Z</option>
+                  <option value="name-desc">🔤 Nombre Z-A</option>
+                  <option value="rating">🏆 Mejor calificados</option>
+                </select>
+              </div>
+            </div>
           </div>
         </aside>
 
         <!-- Products Area -->
         <section class="catalog-main">
-          <!-- Top Bar -->
-          <div class="catalog-toolbar">
-            <button class="btn btn-secondary btn-sm filter-toggle" id="filter-toggle">
+          <!-- Top Bar (mobile filter toggle + count) -->
+          <div class="catalog-topbar">
+            <button class="btn btn-secondary btn-sm filter-drawer-toggle" id="filter-toggle">
               ⚙️ Filtros
             </button>
             <span class="results-count" id="results-count">Cargando...</span>
-            <select class="select sort-select" id="sort-select">
-              <option value="relevant">Más relevantes</option>
-              <option value="price-asc">Precio: menor a mayor</option>
-              <option value="price-desc">Precio: mayor a menor</option>
-              <option value="name-asc">Nombre A-Z</option>
-              <option value="name-desc">Nombre Z-A</option>
-              <option value="rating">Mejor calificados</option>
-            </select>
           </div>
 
           <!-- Product Grid -->
@@ -180,7 +206,10 @@
     initOfflineDetection();
 
     let allProducts = [];
-    let currentFilters = { category: null, minPrice: null, maxPrice: null, search: '' };
+    // Read URL category param (from clicking category cards on home page)
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlCategory = urlParams.get('category');
+    let currentFilters = { category: urlCategory || null, minPrice: null, maxPrice: null, search: '' };
     let currentSort = 'rating-desc';
 
     async function init() {
@@ -193,8 +222,9 @@
     function renderCategories() {
       const categories = getCategories(allProducts);
       const container = document.getElementById('category-filters');
-      container.innerHTML = '<button class="chip chip-active" data-category="all">Todos</button>' +
-        categories.map(c => '<button class="chip" data-category="' + c + '">' + c.charAt(0).toUpperCase() + c.slice(1) + '</button>').join('');
+      const activeCategory = currentFilters.category;
+      container.innerHTML = '<button class="chip ' + (!activeCategory ? 'chip-active' : '') + '" data-category="all">🏷️ Todos</button>' +
+        categories.map(c => '<button class="chip ' + (activeCategory === c ? 'chip-active' : '') + '" data-category="' + c + '">' + c.charAt(0).toUpperCase() + c.slice(1) + '</button>').join('');
       container.addEventListener('click', (e) => {
         const chip = e.target.closest('.chip');
         if (!chip) return;

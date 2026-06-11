@@ -164,26 +164,26 @@
       summaryEl.style.display = 'block';
 
       itemsContainer.innerHTML = cart.map((item, index) => `
-        <div class="cart-item card animate-slide-up stagger-${(index % 4) + 1}" data-product-id="${item.id}">
+        <div class="cart-item card animate-slide-up stagger-${(index % 4) + 1}" data-product-id="${item.productId}">
           <div class="cart-item-image">
             <img src="${sanitizeHTML(item.image)}" alt="${sanitizeHTML(item.title)}">
           </div>
           <div class="cart-item-info">
             <h3 class="cart-item-title">${sanitizeHTML(item.title)}</h3>
-            <span class="chip">${sanitizeHTML(item.category)}</span>
+            <span class="chip">${sanitizeHTML(item.category || '')}</span>
             <p class="cart-item-unit-price">${formatCurrency(item.price)} c/u</p>
           </div>
           <div class="cart-item-controls">
             <div class="qty-controls">
-              <button class="btn btn-icon btn-sm btn-qty-minus" data-id="${item.id}">−</button>
+              <button class="btn btn-icon btn-sm btn-qty-minus" data-id="${item.productId}">−</button>
               <span class="qty-value">${item.quantity}</span>
-              <button class="btn btn-icon btn-sm btn-qty-plus" data-id="${item.id}">+</button>
+              <button class="btn btn-icon btn-sm btn-qty-plus" data-id="${item.productId}">+</button>
             </div>
-            <button class="btn btn-sm btn-secondary btn-clone" data-id="${item.id}" title="Clonar">📋 Clonar</button>
+            <button class="btn btn-sm btn-secondary btn-clone" data-id="${item.productId}" title="Clonar">📋 Clonar</button>
           </div>
           <div class="cart-item-subtotal">
             <p class="price-tag">${formatCurrency(item.price * item.quantity)}</p>
-            <button class="btn btn-icon btn-sm btn-danger btn-remove" data-id="${item.id}" title="Eliminar">✕</button>
+            <button class="btn btn-icon btn-sm btn-danger btn-remove" data-id="${item.productId}" title="Eliminar">✕</button>
           </div>
         </div>
       `).join('');

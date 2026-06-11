@@ -210,7 +210,7 @@
   <!-- ═══════════════════════ JS MODULES ═══════════════════════ -->
   <script type="module">
     import { initTheme } from '../js/theme.js';
-    import { updateCartBadge, updateUserMenu } from '../js/auth.js';
+    import { updateCartBadge, updateUserMenu, getCurrentUser, updateProfile } from '../js/auth.js';
     import { initOfflineDetection } from '../js/offline.js';
     import { showToast } from '../js/utils.js';
     import { Store } from '../js/store.js';
@@ -222,7 +222,7 @@
     initOfflineDetection();
 
     /* ── Route Protection ─────────────────────────────────── */
-    const session = Store.getSession();
+    const session = getCurrentUser();
     if (!session) {
       showToast('Debes iniciar sesión para ver tu perfil', 'warning');
       window.location.href = 'login.html';
@@ -320,26 +320,18 @@
         const avatarUrl = document.getElementById('profile-avatar-url').value.trim();
         const address = document.getElementById('profile-address').value.trim();
 
-        // Update the user in storage
-        const allUsers = Store.getUsers();
-        const idx = allUsers.findIndex(u => u.email === session.email);
-        if (idx !== -1) {
-          allUsers[idx].name = name;
-          allUsers[idx].avatar = avatarUrl;
-          allUsers[idx].address = address;
-          Store.setUsers(allUsers);
+        const result = updateProfile({
+          name,
+          avatar: avatarUrl,
+          address
+        });
 
-          // Update session
-          const updatedSession = { ...session, name };
-          Store.setSession(updatedSession);
-
-          // Update displayed name
+        if (result.success) {
           document.getElementById('profile-display-name').textContent = name;
           updateUserMenu();
-
-          showToast('Perfil actualizado correctamente', 'success');
+          showToast(result.message, 'success');
         } else {
-          showToast('Error al guardar. Inténtalo de nuevo.', 'error');
+          showToast(result.message, 'error');
         }
 
         saveBtn.disabled = false;
@@ -363,22 +355,25 @@
       emptyState.style.display = 'none';
 
       // Sort by date descending
-      userOrders.sort((a, b) => new Date(b.date) - new Date(a.date));
+      userOrders.sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date));
 
       const ordersHTML = userOrders.map(order => {
-        const date = new Date(order.date).toLocaleDateString('es-ES', {
+        const dateStr = order.createdAt || order.date || new Date().toISOString();
+        const date = new Date(dateStr).toLocaleDateString('es-ES', {
           year: 'numeric', month: 'long', day: 'numeric'
         });
-        const time = new Date(order.date).toLocaleTimeString('es-ES', {
+        const time = new Date(dateStr).toLocaleTimeString('es-ES', {
           hour: '2-digit', minute: '2-digit'
         });
 
         // Status badge color
         let statusClass = 'badge-pending';
-        let statusText = 'Pendiente';
+        let statusText = order.status || 'Pendiente';
         switch (order.status) {
+          case 'Entregado':
           case 'completed':
-            statusClass = 'badge-success'; statusText = 'Completado'; break;
+            statusClass = 'badge-success'; statusText = 'Entregado'; break;
+          case 'Enviado':
           case 'shipped':
             statusClass = 'badge-info'; statusText = 'Enviado'; break;
           case 'processing':

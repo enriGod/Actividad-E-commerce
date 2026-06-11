@@ -870,6 +870,81 @@
   color: var(--color-primary);
 }
 
+/* Form link */
+.form-link {
+  color: var(--color-primary);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-sm);
+  transition: color var(--transition-fast);
+}
+
+.form-link:hover {
+  color: var(--color-primary-light);
+  text-decoration: underline;
+}
+
+/* Form actions row */
+.form-actions-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--space-4);
+}
+
+/* Form message (success/error) */
+.form-message {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-sm);
+  margin-top: var(--space-4);
+  text-align: center;
+}
+
+.form-message.error {
+  background: rgba(var(--color-danger-rgb), .1);
+  color: var(--color-danger);
+  border: 1px solid rgba(var(--color-danger-rgb), .2);
+}
+
+.form-message.success {
+  background: rgba(var(--color-success-rgb), .1);
+  color: var(--color-success);
+  border: 1px solid rgba(var(--color-success-rgb), .2);
+}
+
+/* Form error visible state */
+.form-error.visible {
+  display: flex;
+}
+
+/* Password strength meter */
+.password-strength {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.strength-bar {
+  flex: 1;
+  height: 4px;
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.strength-fill {
+  height: 100%;
+  width: 0;
+  border-radius: var(--radius-full);
+  transition: width var(--transition-normal), background var(--transition-normal);
+}
+
+.strength-label {
+  font-size: var(--font-xs);
+  font-weight: var(--font-weight-semibold);
+  min-width: 50px;
+}
+
 /* Select */
 .select {
   width: 100%;
@@ -1263,6 +1338,13 @@
   color: var(--color-text-secondary);
 }
 
+/* Category chips wrapper */
+.category-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
 /* Chips */
 .chip {
   display: inline-flex;
@@ -1285,7 +1367,8 @@
   background: rgba(var(--color-primary-rgb), .06);
 }
 
-.chip.active {
+.chip.active,
+.chip-active {
   background: var(--gradient-primary);
   color: #fff;
   border-color: transparent;

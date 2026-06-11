@@ -227,12 +227,12 @@
 
       // Edit handlers
       tbody.querySelectorAll('.btn-edit').forEach(btn => {
-        btn.addEventListener('click', () => openEditModal(parseInt(btn.dataset.id)));
+       btn.addEventListener('click', () => openEditModal(btn.dataset.id));
       });
 
       // Delete handlers
       tbody.querySelectorAll('.btn-delete').forEach(btn => {
-        btn.addEventListener('click', () => openDeleteModal(parseInt(btn.dataset.id)));
+       btn.addEventListener('click', () => openDeleteModal(btn.dataset.id));
       });
     }
 
@@ -275,7 +275,7 @@
 
     // Open modal for editing
     function openEditModal(id) {
-      const product = Store.getProducts().find(p => p.id === id);
+     const product = products.find(p => String(p.id) === String(id));
       if (!product) return;
 
       editingProductId = id;
@@ -352,7 +352,7 @@
 
     // Delete modal
     function openDeleteModal(id) {
-      const product = Store.getProducts().find(p => p.id === id);
+     const product = products.find(p => String(p.id) === String(id));
       if (!product) return;
       deletingProductId = id;
       document.getElementById('delete-product-name').textContent = product.title;
