@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <title>Gestión de Productos — Admin E-Market</title>
+  <meta name="description" content="Administración de productos E-Market">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/pages.css">
+  <script>
+    {
+      const t = localStorage.getItem('emarket_theme');
+      if (t) document.documentElement.setAttribute('data-theme', t);
+      else if (window.matchMedia('(prefers-color-scheme: dark)').matches)
+        document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  </script>
+</head>
+<body>
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar" id="admin-sidebar">
+      <div class="admin-sidebar-brand">
+        <a href="../index.html">
+          <span class="brand-icon">🛒</span>
+          <span class="brand-text">E-Market</span>
+        </a>
+        <span class="badge badge-admin">Admin</span>
+      </div>
+      <nav class="admin-nav">
+        <a href="admin-dashboard.html" class="admin-nav-link" id="nav-dashboard">
+          📊 <span>Dashboard</span>
+        </a>
+        <a href="admin-products.html" class="admin-nav-link admin-nav-active" id="nav-products">
+          📦 <span>Productos</span>
+        </a>
+        <a href="admin-sales.html" class="admin-nav-link" id="nav-sales">
+          💰 <span>Ventas</span>
+        </a>
+      </nav>
+      <div class="admin-sidebar-footer">
+        <a href="../index.html" class="admin-nav-link">🏠 <span>Ir a Tienda</span></a>
+        <button class="admin-nav-link" id="admin-logout">🚪 <span>Cerrar Sesión</span></button>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="admin-main">
+      <header class="admin-header">
+        <button class="mobile-menu-btn" id="admin-menu-btn">☰</button>
+        <h1 class="admin-title">Gestión de Productos</h1>
+        <div class="admin-user">
+          <span id="admin-name"></span>
+          <button class="theme-toggle" id="theme-toggle"><span class="theme-icon">🌙</span></button>
+        </div>
+      </header>
+
+      <div class="admin-content">
+        <!-- Actions Bar -->
+        <div class="admin-actions-bar animate-fade-in">
+          <input type="search" class="input search-bar" id="product-search" placeholder="🔍 Buscar productos...">
+          <button class="btn btn-primary" id="btn-add-product">+ Agregar Producto</button>
+        </div>
+
+        <!-- Products Table -->
+        <div class="card animate-slide-up">
+          <div class="table-container">
+            <table class="table" id="products-table">
+              <thead>
+                <tr>
+                  <th>Imagen</th>
+                  <th>Nombre</th>
+                  <th>Categoría</th>
+                  <th>Precio</th>
+                  <th>Stock</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="products-body">
+              </tbody>
+            </table>
+          </div>
+          <p class="empty-state" id="no-products" style="display:none">No hay productos registrados</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Product Modal -->
+  <div class="modal-overlay" id="product-modal" style="display:none">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modal-title">Nuevo Producto</h2>
+        <button class="btn btn-icon" id="modal-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="product-form">
+          <div class="form-group">
+            <label class="form-label">Nombre del Producto *</label>
+            <input type="text" class="input" id="form-name" required placeholder="Nombre del producto">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Descripción *</label>
+            <textarea class="input" id="form-desc" required rows="3" placeholder="Descripción del producto"></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Precio ($) *</label>
+              <input type="number" class="input" id="form-price" required min="0.01" step="0.01" placeholder="0.00">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Stock *</label>
+              <input type="number" class="input" id="form-stock" required min="0" placeholder="0">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Categoría *</label>
+            <select class="input" id="form-category">
+              <option value="">Seleccionar categoría</option>
+            </select>
+            <input type="text" class="input" id="form-new-category" placeholder="Nueva categoría" style="display:none;margin-top:0.5rem">
+          </div>
+          <div class="form-group">
+            <label class="form-label">URL de Imagen</label>
+            <input type="url" class="input" id="form-image" placeholder="https://...">
+            <div class="image-preview" id="image-preview" style="margin-top:0.5rem"></div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="modal-cancel">Cancelar</button>
+        <button class="btn btn-primary" id="modal-save">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" id="delete-modal" style="display:none">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>⚠️ Confirmar Eliminación</h2>
+        <button class="btn btn-icon" id="delete-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <p>¿Estás seguro de que deseas eliminar el producto:</p>
+        <p><strong id="delete-product-name"></strong>?</p>
+        <p style="opacity:0.7;margin-top:0.5rem">Esta acción no se puede deshacer.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="delete-cancel">Cancelar</button>
+        <button class="btn btn-danger" id="delete-confirm">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <script type="module">
+    import { protectRoute, getCurrentUser, logout } from '../js/auth.js';
+    import { initTheme } from '../js/theme.js';
+    import { Store } from '../js/store.js';
+    import { addProduct, updateProduct, deleteProduct } from '../js/admin.js';
+    import { getCategories } from '../js/products.js';
+    import { formatCurrency, sanitizeHTML, showToast, debounce } from '../js/utils.js';
+
+    protectRoute('admin');
+    initTheme();
+
+    const user = getCurrentUser();
+    document.getElementById('admin-name').textContent = user?.name || 'Admin';
+
+    let editingProductId = null;
+    let deletingProductId = null;
+
+    // Logout
+    document.getElementById('admin-logout').addEventListener('click', () => {
+      logout();
+      window.location.href = '../index.html';
+    });
+
+    // Mobile sidebar
+    document.getElementById('admin-menu-btn').addEventListener('click', () => {
+      document.getElementById('admin-sidebar').classList.toggle('sidebar-open');
+    });
+
+    // Render table
+    function renderProducts(filter = '') {
+      let products = Store.getProducts();
+      if (filter) {
+        const f = filter.toLowerCase();
+        products = products.filter(p =>
+          p.title.toLowerCase().includes(f) ||
+          p.category.toLowerCase().includes(f)
+        );
+      }
+
+      const tbody = document.getElementById('products-body');
+      const noProducts = document.getElementById('no-products');
+
+      if (products.length === 0) {
+        tbody.innerHTML = '';
+        noProducts.style.display = 'block';
+        return;
+      }
+
+      noProducts.style.display = 'none';
+      tbody.innerHTML = products.map(p => `
+        <tr>
+          <td><img src="${sanitizeHTML(p.image)}" alt="" class="table-thumb" style="width:50px;height:50px;object-fit:contain;border-radius:8px;background:var(--color-surface-secondary)"></td>
+          <td><strong>${sanitizeHTML(p.title).substring(0, 40)}${p.title.length > 40 ? '...' : ''}</strong></td>
+          <td><span class="chip">${sanitizeHTML(p.category)}</span></td>
+          <td>${formatCurrency(p.price)}</td>
+          <td><span class="badge ${p.stock > 10 ? 'badge-success' : p.stock > 0 ? 'badge-warning' : 'badge-danger'}">${p.stock}</span></td>
+          <td class="table-actions">
+            <button class="btn btn-sm btn-secondary btn-edit" data-id="${p.id}" title="Editar">✏️</button>
+            <button class="btn btn-sm btn-danger btn-delete" data-id="${p.id}" title="Eliminar">🗑️</button>
+          </td>
+        </tr>
+      `).join('');
+
+      // Edit handlers
+      tbody.querySelectorAll('.btn-edit').forEach(btn => {
+        btn.addEventListener('click', () => openEditModal(parseInt(btn.dataset.id)));
+      });
+
+      // Delete handlers
+      tbody.querySelectorAll('.btn-delete').forEach(btn => {
+        btn.addEventListener('click', () => openDeleteModal(parseInt(btn.dataset.id)));
+      });
+    }
+
+    // Category dropdown
+    function loadCategories() {
+      const products = Store.getProducts();
+      const categories = getCategories(products);
+      const select = document.getElementById('form-category');
+      select.innerHTML = '<option value="">Seleccionar categoría</option>' +
+        categories.map(c => '<option value="' + c + '">' + c.charAt(0).toUpperCase() + c.slice(1) + '</option>').join('') +
+        '<option value="__new__">+ Nueva categoría</option>';
+    }
+
+    document.getElementById('form-category').addEventListener('change', (e) => {
+      const newCatInput = document.getElementById('form-new-category');
+      newCatInput.style.display = e.target.value === '__new__' ? 'block' : 'none';
+      if (e.target.value !== '__new__') newCatInput.value = '';
+    });
+
+    // Image preview
+    document.getElementById('form-image').addEventListener('input', debounce((e) => {
+      const preview = document.getElementById('image-preview');
+      if (e.target.value) {
+        preview.innerHTML = '<img src="' + sanitizeHTML(e.target.value) + '" style="max-width:100px;max-height:100px;border-radius:8px;object-fit:contain" onerror="this.style.display=\'none\'">';
+      } else {
+        preview.innerHTML = '';
+      }
+    }, 500));
+
+    // Open modal for creating
+    document.getElementById('btn-add-product').addEventListener('click', () => {
+      editingProductId = null;
+      document.getElementById('modal-title').textContent = 'Nuevo Producto';
+      document.getElementById('product-form').reset();
+      document.getElementById('image-preview').innerHTML = '';
+      document.getElementById('form-new-category').style.display = 'none';
+      loadCategories();
+      document.getElementById('product-modal').style.display = 'flex';
+    });
+
+    // Open modal for editing
+    function openEditModal(id) {
+      const product = Store.getProducts().find(p => p.id === id);
+      if (!product) return;
+
+      editingProductId = id;
+      document.getElementById('modal-title').textContent = 'Editar Producto';
+      document.getElementById('form-name').value = product.title;
+      document.getElementById('form-desc').value = product.description;
+      document.getElementById('form-price').value = product.price;
+      document.getElementById('form-stock').value = product.stock;
+      document.getElementById('form-image').value = product.image || '';
+      document.getElementById('form-new-category').style.display = 'none';
+
+      loadCategories();
+      document.getElementById('form-category').value = product.category;
+
+      if (product.image) {
+        document.getElementById('image-preview').innerHTML = '<img src="' + sanitizeHTML(product.image) + '" style="max-width:100px;max-height:100px;border-radius:8px;object-fit:contain">';
+      }
+
+      document.getElementById('product-modal').style.display = 'flex';
+    }
+
+    // Close modal
+    function closeModal() {
+      document.getElementById('product-modal').style.display = 'none';
+      editingProductId = null;
+    }
+
+    document.getElementById('modal-close').addEventListener('click', closeModal);
+    document.getElementById('modal-cancel').addEventListener('click', closeModal);
+    document.getElementById('product-modal').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) closeModal();
+    });
+
+    // Save product
+    document.getElementById('modal-save').addEventListener('click', () => {
+      const name = document.getElementById('form-name').value.trim();
+      const desc = document.getElementById('form-desc').value.trim();
+      const price = parseFloat(document.getElementById('form-price').value);
+      const stock = parseInt(document.getElementById('form-stock').value);
+      let category = document.getElementById('form-category').value;
+      const image = document.getElementById('form-image').value.trim();
+
+      if (category === '__new__') {
+        category = document.getElementById('form-new-category').value.trim().toLowerCase();
+      }
+
+      if (!name || !desc || !price || isNaN(stock) || !category) {
+        showToast('Por favor completa todos los campos requeridos', 'error');
+        return;
+      }
+
+      const productData = {
+        title: name,
+        description: desc,
+        price: price,
+        stock: stock,
+        category: category,
+        image: image || 'https://via.placeholder.com/300x300?text=Sin+Imagen',
+        rating: 0,
+        ratingCount: 0
+      };
+
+      if (editingProductId) {
+        updateProduct(editingProductId, productData);
+        showToast('Producto actualizado exitosamente', 'success');
+      } else {
+        addProduct(productData);
+        showToast('Producto creado exitosamente', 'success');
+      }
+
+      closeModal();
+      renderProducts();
+    });
+
+    // Delete modal
+    function openDeleteModal(id) {
+      const product = Store.getProducts().find(p => p.id === id);
+      if (!product) return;
+      deletingProductId = id;
+      document.getElementById('delete-product-name').textContent = product.title;
+      document.getElementById('delete-modal').style.display = 'flex';
+    }
+
+    function closeDeleteModal() {
+      document.getElementById('delete-modal').style.display = 'none';
+      deletingProductId = null;
+    }
+
+    document.getElementById('delete-close').addEventListener('click', closeDeleteModal);
+    document.getElementById('delete-cancel').addEventListener('click', closeDeleteModal);
+    document.getElementById('delete-modal').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) closeDeleteModal();
+    });
+
+    document.getElementById('delete-confirm').addEventListener('click', () => {
+      if (deletingProductId) {
+        deleteProduct(deletingProductId);
+        showToast('Producto eliminado', 'info');
+        closeDeleteModal();
+        renderProducts();
+      }
+    });
+
+    // Search
+    document.getElementById('product-search').addEventListener('input', debounce((e) => {
+      renderProducts(e.target.value);
+    }, 300));
+
+    renderProducts();
+  </script>
+</body>
+</html>

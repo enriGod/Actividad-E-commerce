@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <title>Detalle de Producto — E-Market</title>
+  <meta name="description" content="Detalle del producto en E-Market">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/pages.css">
+  <link rel="manifest" href="../manifest.json">
+  <script>
+    {
+      const t = localStorage.getItem('emarket_theme');
+      if (t) document.documentElement.setAttribute('data-theme', t);
+      else if (window.matchMedia('(prefers-color-scheme: dark)').matches)
+        document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  </script>
+</head>
+<body>
+  <!-- Navbar -->
+  <header class="navbar" id="main-navbar">
+    <div class="navbar-container">
+      <a href="../index.html" class="navbar-brand">
+        <span class="brand-icon">🛒</span>
+        <span class="brand-text">E-Market</span>
+      </a>
+      <nav class="navbar-nav" id="main-nav">
+        <a href="../index.html" class="nav-link">Inicio</a>
+        <a href="catalog.html" class="nav-link">Catálogo</a>
+        <a href="cart.html" class="nav-link nav-cart">
+          🛍️ Carrito <span class="cart-badge" id="cart-badge">0</span>
+        </a>
+      </nav>
+      <div class="navbar-actions">
+        <button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema">
+          <span class="theme-icon">🌙</span>
+        </button>
+        <div class="user-menu" id="user-menu">
+          <button class="user-menu-btn" id="user-menu-btn">👤</button>
+          <div class="user-dropdown" id="user-dropdown"></div>
+        </div>
+        <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menú">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="page-content">
+    <div class="container">
+      <a href="catalog.html" class="back-link animate-fade-in">← Volver al catálogo</a>
+
+      <!-- Product Detail -->
+      <div class="product-detail" id="product-detail">
+        <div class="product-detail-image animate-slide-up stagger-1">
+          <img id="product-img" src="" alt="">
+        </div>
+        <div class="product-detail-info animate-slide-up stagger-2">
+          <span class="chip chip-active" id="product-category"></span>
+          <h1 class="product-detail-title" id="product-title"></h1>
+          <div class="product-detail-rating" id="product-rating"></div>
+          <p class="product-detail-price price-tag" id="product-price"></p>
+          <p class="product-detail-desc" id="product-desc"></p>
+          <div class="product-stock" id="product-stock"></div>
+
+          <div class="product-actions">
+            <div class="qty-controls">
+              <button class="btn btn-icon" id="qty-minus">−</button>
+              <span class="qty-value" id="qty-value">1</span>
+              <button class="btn btn-icon" id="qty-plus">+</button>
+            </div>
+            <button class="btn btn-primary btn-lg" id="btn-add-cart">🛒 Agregar al Carrito</button>
+            <button class="btn btn-accent btn-lg" id="btn-buy-now">⚡ Comprar Ahora</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reviews Section -->
+      <section class="section animate-slide-up stagger-3">
+        <h2 class="section-title">Reseñas de Clientes</h2>
+        <div id="review-form"></div>
+        <div id="reviews-list"></div>
+      </section>
+
+      <!-- Related Products -->
+      <section class="section animate-slide-up stagger-4">
+        <h2 class="section-title">Productos Relacionados</h2>
+        <div class="catalog-grid" id="related-products"></div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer" id="main-footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <span class="brand-icon">🛒</span>
+        <span class="brand-text">E-Market</span>
+        <p class="footer-tagline">Tu tienda premium online</p>
+      </div>
+      <div class="footer-links">
+        <h4>Navegación</h4>
+        <a href="../index.html">Inicio</a>
+        <a href="catalog.html">Catálogo</a>
+        <a href="cart.html">Carrito</a>
+      </div>
+      <div class="footer-links">
+        <h4>Legal</h4>
+        <a href="#">Política de Privacidad</a>
+        <a href="#">Términos y Condiciones</a>
+      </div>
+      <div class="footer-social">
+        <h4>Síguenos</h4>
+        <div class="social-icons">
+          <a href="#" aria-label="Facebook">📘</a>
+          <a href="#" aria-label="Instagram">📷</a>
+          <a href="#" aria-label="Twitter">🐦</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 E-Market. Todos los derechos reservados.</p>
+      <div class="connection-status" id="connection-status">
+        <span class="status-dot online"></span>
+        <span class="status-text">Online</span>
+      </div>
+    </div>
+  </footer>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <script type="module">
+    import { initTheme } from '../js/theme.js';
+    import { updateCartBadge, updateUserMenu, isLoggedIn, getCurrentUser } from '../js/auth.js';
+    import { initOfflineDetection } from '../js/offline.js';
+    import { Store } from '../js/store.js';
+    import { getProductById, renderProductCard } from '../js/products.js';
+    import { addToCart } from '../js/cart.js';
+    import { renderReviewForm, renderReviewList, getAverageRating } from '../js/reviews.js';
+    import { showToast, formatCurrency, sanitizeHTML } from '../js/utils.js';
+
+    initTheme();
+    updateUserMenu();
+    updateCartBadge();
+    initOfflineDetection();
+
+    // Get product ID from URL
+    const params = new URLSearchParams(window.location.search);
+    const productId = parseInt(params.get('id'));
+    let quantity = 1;
+    let product = null;
+
+    function renderStarsStatic(rating) {
+      let html = '<div class="stars">';
+      for (let i = 1; i <= 5; i++) {
+        html += '<span class="star ' + (i <= Math.round(rating) ? 'star-filled' : '') + '">★</span>';
+      }
+      html += ' <span style="margin-left:0.5rem;opacity:0.7">(' + rating.toFixed(1) + ')</span></div>';
+      return html;
+    }
+
+    function loadProduct() {
+      product = getProductById(productId);
+      if (!product) {
+        document.getElementById('product-detail').innerHTML =
+          '<div class="empty-state"><p style="font-size:3rem">😔</p><h3>Producto no encontrado</h3><a href="catalog.html" class="btn btn-primary">Volver al catálogo</a></div>';
+        return;
+      }
+
+      document.title = sanitizeHTML(product.title) + ' — E-Market';
+      document.getElementById('product-img').src = product.image;
+      document.getElementById('product-img').alt = sanitizeHTML(product.title);
+      document.getElementById('product-category').textContent = product.category;
+      document.getElementById('product-title').textContent = product.title;
+      document.getElementById('product-price').textContent = formatCurrency(product.price);
+      document.getElementById('product-desc').textContent = product.description;
+
+      // Rating
+      const avgData = getAverageRating(productId);
+      const displayRating = avgData.count > 0 ? avgData.average : product.rating;
+      document.getElementById('product-rating').innerHTML = renderStarsStatic(displayRating);
+
+      // Stock
+      const stockEl = document.getElementById('product-stock');
+      if (product.stock > 10) {
+        stockEl.innerHTML = '<span class="badge badge-success">✓ En stock (' + product.stock + ' disponibles)</span>';
+      } else if (product.stock > 0) {
+        stockEl.innerHTML = '<span class="badge badge-warning">⚠ Pocas unidades (' + product.stock + ')</span>';
+      } else {
+        stockEl.innerHTML = '<span class="badge badge-danger">✗ Agotado</span>';
+      }
+
+      // Reviews
+      renderReviewForm(productId, 'review-form');
+      renderReviewList(productId, 'reviews-list');
+
+      // Related products
+      loadRelated();
+    }
+
+    function loadRelated() {
+      const allProducts = Store.getProducts();
+      const related = allProducts
+        .filter(p => p.category === product.category && p.id !== product.id)
+        .slice(0, 4);
+
+      const container = document.getElementById('related-products');
+      if (related.length) {
+        container.innerHTML = related.map((p, i) =>
+          '<div class="animate-slide-up stagger-' + (i + 1) + '">' + renderProductCard(p) + '</div>'
+        ).join('');
+        container.querySelectorAll('.btn-add-cart').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const id = parseInt(e.currentTarget.dataset.productId);
+            const p = allProducts.find(pr => pr.id === id);
+            if (p) { addToCart(p); updateCartBadge(); }
+          });
+        });
+        container.querySelectorAll('.card-product').forEach(card => {
+          card.addEventListener('click', (e) => {
+            if (e.target.closest('.btn-add-cart')) return;
+            window.location.href = 'product.html?id=' + card.dataset.productId;
+          });
+          card.style.cursor = 'pointer';
+        });
+      } else {
+        container.innerHTML = '<p style="opacity:0.6">No hay productos relacionados</p>';
+      }
+    }
+
+    // Quantity controls
+    document.getElementById('qty-minus').addEventListener('click', () => {
+      if (quantity > 1) { quantity--; document.getElementById('qty-value').textContent = quantity; }
+    });
+    document.getElementById('qty-plus').addEventListener('click', () => {
+      if (product && quantity < product.stock) { quantity++; document.getElementById('qty-value').textContent = quantity; }
+    });
+
+    // Add to cart
+    document.getElementById('btn-add-cart').addEventListener('click', () => {
+      if (!product) return;
+      addToCart(product, quantity);
+      updateCartBadge();
+    });
+
+    // Buy now
+    document.getElementById('btn-buy-now').addEventListener('click', () => {
+      if (!product) return;
+      addToCart(product, quantity);
+      if (!isLoggedIn()) {
+        window.location.href = 'login.html?redirect=checkout';
+      } else {
+        window.location.href = 'checkout.html';
+      }
+    });
+
+    // Mobile menu
+    document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+      document.getElementById('main-nav').classList.toggle('nav-open');
+    });
+
+    loadProduct();
+  </script>
+</body>
+</html>

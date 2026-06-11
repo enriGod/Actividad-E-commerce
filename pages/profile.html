@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <title>Mi Perfil — E-Market</title>
+  <meta name="description" content="Gestiona tu perfil, datos personales e historial de pedidos en E-Market.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/pages.css">
+  <link rel="manifest" href="../manifest.json">
+  <!-- Prevent FOUC -->
+  <script>
+    {
+      const t = localStorage.getItem('emarket_theme');
+      if (t) document.documentElement.setAttribute('data-theme', t);
+      else if (window.matchMedia('(prefers-color-scheme: dark)').matches)
+        document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  </script>
+</head>
+<body>
+
+  <!-- ═══════════════════════ NAVBAR ═══════════════════════ -->
+  <header class="navbar" id="main-navbar">
+    <div class="navbar-container">
+      <a href="/index.html" class="navbar-brand">
+        <span class="brand-icon">🛒</span>
+        <span class="brand-text">E-Market</span>
+      </a>
+      <nav class="navbar-nav" id="main-nav">
+        <a href="/index.html" class="nav-link">Inicio</a>
+        <a href="/pages/catalog.html" class="nav-link">Catálogo</a>
+        <a href="/pages/cart.html" class="nav-link nav-cart">
+          🛍️ Carrito <span class="cart-badge" id="cart-badge">0</span>
+        </a>
+      </nav>
+      <div class="navbar-actions">
+        <button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema">
+          <span class="theme-icon">🌙</span>
+        </button>
+        <div class="user-menu" id="user-menu">
+          <button class="user-menu-btn" id="user-menu-btn">👤</button>
+          <div class="user-dropdown" id="user-dropdown"></div>
+        </div>
+        <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menú">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════ PROFILE MAIN ═══════════════════════ -->
+  <main class="profile-page section">
+    <div class="container">
+      <h1 class="page-title animate-slide-up">Mi Perfil</h1>
+
+      <div class="profile-layout">
+
+        <!-- ─── PROFILE INFO CARD ─── -->
+        <section class="profile-card glass-card animate-slide-up stagger-1">
+          <div class="profile-avatar-section">
+            <div class="profile-avatar" id="profile-avatar">
+              <img
+                src=""
+                alt="Avatar del usuario"
+                id="avatar-img"
+                class="avatar-img"
+                onerror="this.style.display='none'; document.getElementById('avatar-fallback').style.display='flex';"
+              >
+              <span class="avatar-fallback" id="avatar-fallback">👤</span>
+            </div>
+            <h2 class="profile-name" id="profile-display-name">Usuario</h2>
+            <span class="profile-role badge" id="profile-role">Cliente</span>
+          </div>
+
+          <form class="profile-form" id="profile-form">
+            <!-- Name -->
+            <div class="form-group">
+              <label for="profile-name" class="form-label">Nombre Completo</label>
+              <div class="input-wrapper">
+                <span class="input-icon">👤</span>
+                <input
+                  type="text"
+                  id="profile-name-input"
+                  class="input"
+                  placeholder="Tu nombre"
+                  required
+                >
+              </div>
+              <span class="form-error" id="profile-name-error"></span>
+            </div>
+
+            <!-- Email (readonly) -->
+            <div class="form-group">
+              <label for="profile-email" class="form-label">Correo Electrónico</label>
+              <div class="input-wrapper">
+                <span class="input-icon">📧</span>
+                <input
+                  type="email"
+                  id="profile-email"
+                  class="input input-readonly"
+                  readonly
+                  tabindex="-1"
+                >
+              </div>
+              <span class="form-hint">El correo no se puede cambiar</span>
+            </div>
+
+            <!-- Avatar URL -->
+            <div class="form-group">
+              <label for="profile-avatar-url" class="form-label">URL del Avatar</label>
+              <div class="input-wrapper">
+                <span class="input-icon">🖼️</span>
+                <input
+                  type="url"
+                  id="profile-avatar-url"
+                  class="input"
+                  placeholder="https://ejemplo.com/avatar.jpg"
+                >
+              </div>
+              <span class="form-hint">Pega la URL de una imagen para tu avatar</span>
+            </div>
+
+            <!-- Shipping Address -->
+            <div class="form-group">
+              <label for="profile-address" class="form-label">Dirección de Envío</label>
+              <div class="input-wrapper textarea-wrapper">
+                <textarea
+                  id="profile-address"
+                  class="input textarea"
+                  placeholder="Tu dirección completa de envío"
+                  rows="3"
+                ></textarea>
+              </div>
+            </div>
+
+            <!-- Save -->
+            <button type="submit" class="btn btn-primary btn-block" id="save-profile-btn">
+              <span class="btn-text">💾 Guardar Cambios</span>
+              <span class="btn-loader" hidden>⏳</span>
+            </button>
+          </form>
+        </section>
+
+        <!-- ─── ORDER HISTORY ─── -->
+        <section class="orders-card glass-card animate-slide-up stagger-2">
+          <div class="orders-header">
+            <h2 class="orders-title">📦 Historial de Pedidos</h2>
+          </div>
+          <div class="orders-list" id="orders-list">
+            <!-- Populated by JS -->
+            <div class="empty-state" id="orders-empty">
+              <span class="empty-icon">📋</span>
+              <p>No tienes pedidos todavía</p>
+              <a href="catalog.html" class="btn btn-outline btn-sm">Ir al Catálogo</a>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- ═══════════════════════ FOOTER ═══════════════════════ -->
+  <footer class="footer" id="main-footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <span class="brand-icon">🛒</span>
+        <span class="brand-text">E-Market</span>
+        <p class="footer-tagline">Tu tienda premium online</p>
+      </div>
+      <div class="footer-links">
+        <h4>Navegación</h4>
+        <a href="/index.html">Inicio</a>
+        <a href="/pages/catalog.html">Catálogo</a>
+        <a href="/pages/cart.html">Carrito</a>
+      </div>
+      <div class="footer-links">
+        <h4>Legal</h4>
+        <a href="#">Política de Privacidad</a>
+        <a href="#">Términos y Condiciones</a>
+        <a href="#">Contacto</a>
+      </div>
+      <div class="footer-social">
+        <h4>Síguenos</h4>
+        <div class="social-icons">
+          <a href="#" aria-label="Facebook">📘</a>
+          <a href="#" aria-label="Instagram">📷</a>
+          <a href="#" aria-label="Twitter">🐦</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 E-Market. Todos los derechos reservados.</p>
+      <div class="connection-status" id="connection-status">
+        <span class="status-dot online"></span>
+        <span class="status-text">Online</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- ═══════════════════════ JS MODULES ═══════════════════════ -->
+  <script type="module">
+    import { initTheme } from '../js/theme.js';
+    import { updateCartBadge, updateUserMenu } from '../js/auth.js';
+    import { initOfflineDetection } from '../js/offline.js';
+    import { showToast } from '../js/utils.js';
+    import { Store } from '../js/store.js';
+
+    /* ── Init ─────────────────────────────────────────────── */
+    initTheme();
+    updateUserMenu();
+    updateCartBadge();
+    initOfflineDetection();
+
+    /* ── Route Protection ─────────────────────────────────── */
+    const session = Store.getSession();
+    if (!session) {
+      showToast('Debes iniciar sesión para ver tu perfil', 'warning');
+      window.location.href = 'login.html';
+    }
+
+    /* ── Load User Data ───────────────────────────────────── */
+    const users = Store.getUsers();
+    const currentUser = users.find(u => u.email === session?.email);
+
+    if (currentUser) {
+      // Display name
+      document.getElementById('profile-display-name').textContent = currentUser.name || 'Usuario';
+
+      // Role badge
+      const roleBadge = document.getElementById('profile-role');
+      if (currentUser.role === 'admin') {
+        roleBadge.textContent = 'Administrador';
+        roleBadge.classList.add('badge-admin');
+      } else {
+        roleBadge.textContent = 'Cliente';
+        roleBadge.classList.add('badge-client');
+      }
+
+      // Avatar
+      const avatarImg = document.getElementById('avatar-img');
+      const avatarFallback = document.getElementById('avatar-fallback');
+      if (currentUser.avatar) {
+        avatarImg.src = currentUser.avatar;
+        avatarImg.style.display = 'block';
+        avatarFallback.style.display = 'none';
+      } else {
+        avatarImg.style.display = 'none';
+        avatarFallback.style.display = 'flex';
+      }
+
+      // Form fields
+      document.getElementById('profile-name-input').value = currentUser.name || '';
+      document.getElementById('profile-email').value = currentUser.email || '';
+      document.getElementById('profile-avatar-url').value = currentUser.avatar || '';
+      document.getElementById('profile-address').value = currentUser.address || '';
+    }
+
+    /* ── Live Avatar Preview ──────────────────────────────── */
+    const avatarUrlInput = document.getElementById('profile-avatar-url');
+    avatarUrlInput?.addEventListener('input', debounce(function () {
+      const url = this.value.trim();
+      const avatarImg = document.getElementById('avatar-img');
+      const avatarFallback = document.getElementById('avatar-fallback');
+      if (url) {
+        avatarImg.src = url;
+        avatarImg.style.display = 'block';
+        avatarFallback.style.display = 'none';
+        avatarImg.onerror = () => {
+          avatarImg.style.display = 'none';
+          avatarFallback.style.display = 'flex';
+        };
+      } else {
+        avatarImg.style.display = 'none';
+        avatarFallback.style.display = 'flex';
+      }
+    }, 500));
+
+    function debounce(fn, delay) {
+      let timer;
+      return function (...args) {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn.apply(this, args), delay);
+      };
+    }
+
+    /* ── Save Profile ─────────────────────────────────────── */
+    document.getElementById('profile-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const nameInput = document.getElementById('profile-name-input');
+      const nameError = document.getElementById('profile-name-error');
+      const name = nameInput.value.trim();
+
+      // Validation
+      if (!name) {
+        nameError.textContent = 'El nombre es obligatorio';
+        nameError.classList.add('visible');
+        nameInput.focus();
+        return;
+      }
+      nameError.textContent = '';
+      nameError.classList.remove('visible');
+
+      const saveBtn = document.getElementById('save-profile-btn');
+      saveBtn.disabled = true;
+      saveBtn.querySelector('.btn-text').hidden = true;
+      saveBtn.querySelector('.btn-loader').hidden = false;
+
+      setTimeout(() => {
+        const avatarUrl = document.getElementById('profile-avatar-url').value.trim();
+        const address = document.getElementById('profile-address').value.trim();
+
+        // Update the user in storage
+        const allUsers = Store.getUsers();
+        const idx = allUsers.findIndex(u => u.email === session.email);
+        if (idx !== -1) {
+          allUsers[idx].name = name;
+          allUsers[idx].avatar = avatarUrl;
+          allUsers[idx].address = address;
+          Store.setUsers(allUsers);
+
+          // Update session
+          const updatedSession = { ...session, name };
+          Store.setSession(updatedSession);
+
+          // Update displayed name
+          document.getElementById('profile-display-name').textContent = name;
+          updateUserMenu();
+
+          showToast('Perfil actualizado correctamente', 'success');
+        } else {
+          showToast('Error al guardar. Inténtalo de nuevo.', 'error');
+        }
+
+        saveBtn.disabled = false;
+        saveBtn.querySelector('.btn-text').hidden = false;
+        saveBtn.querySelector('.btn-loader').hidden = true;
+      }, 600);
+    });
+
+    /* ── Load Order History ────────────────────────────────── */
+    function loadOrders() {
+      const orders = Store.getOrders();
+      const userOrders = orders.filter(o => o.userEmail === session?.email);
+      const container = document.getElementById('orders-list');
+      const emptyState = document.getElementById('orders-empty');
+
+      if (!userOrders.length) {
+        emptyState.style.display = 'flex';
+        return;
+      }
+
+      emptyState.style.display = 'none';
+
+      // Sort by date descending
+      userOrders.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      const ordersHTML = userOrders.map(order => {
+        const date = new Date(order.date).toLocaleDateString('es-ES', {
+          year: 'numeric', month: 'long', day: 'numeric'
+        });
+        const time = new Date(order.date).toLocaleTimeString('es-ES', {
+          hour: '2-digit', minute: '2-digit'
+        });
+
+        // Status badge color
+        let statusClass = 'badge-pending';
+        let statusText = 'Pendiente';
+        switch (order.status) {
+          case 'completed':
+            statusClass = 'badge-success'; statusText = 'Completado'; break;
+          case 'shipped':
+            statusClass = 'badge-info'; statusText = 'Enviado'; break;
+          case 'processing':
+            statusClass = 'badge-warning'; statusText = 'Procesando'; break;
+          case 'cancelled':
+            statusClass = 'badge-danger'; statusText = 'Cancelado'; break;
+          default:
+            statusClass = 'badge-pending'; statusText = 'Pendiente';
+        }
+
+        const itemsHTML = (order.items || []).map(item => `
+          <div class="order-item">
+            <span class="order-item-name">${item.name || 'Producto'}</span>
+            <span class="order-item-qty">x${item.quantity || 1}</span>
+            <span class="order-item-price">$${(item.price || 0).toFixed(2)}</span>
+          </div>
+        `).join('');
+
+        return `
+          <div class="order-entry">
+            <div class="order-summary" data-order-id="${order.id}">
+              <div class="order-main-info">
+                <span class="order-id">#${order.id}</span>
+                <span class="order-date">${date} — ${time}</span>
+              </div>
+              <div class="order-meta">
+                <span class="badge ${statusClass}">${statusText}</span>
+                <span class="order-total">$${(order.total || 0).toFixed(2)}</span>
+                <button class="order-expand-btn" aria-label="Ver detalles" aria-expanded="false">▼</button>
+              </div>
+            </div>
+            <div class="order-details" hidden>
+              <div class="order-items-list">
+                ${itemsHTML || '<p class="order-no-items">Sin detalles disponibles</p>'}
+              </div>
+              ${order.address ? `<p class="order-address"><strong>Dirección:</strong> ${order.address}</p>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML = ordersHTML;
+
+      // Expand/collapse handlers
+      container.querySelectorAll('.order-expand-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const entry = btn.closest('.order-entry');
+          const details = entry.querySelector('.order-details');
+          const isHidden = details.hidden;
+          details.hidden = !isHidden;
+          btn.textContent = isHidden ? '▲' : '▼';
+          btn.setAttribute('aria-expanded', isHidden);
+        });
+      });
+
+      // Click on order summary row also toggles
+      container.querySelectorAll('.order-summary').forEach(row => {
+        row.addEventListener('click', (e) => {
+          if (e.target.closest('.order-expand-btn')) return; // don't double-toggle
+          const entry = row.closest('.order-entry');
+          const btn = entry.querySelector('.order-expand-btn');
+          btn?.click();
+        });
+      });
+    }
+
+    loadOrders();
+
+    /* ── Mobile Menu ──────────────────────────────────────── */
+    document.getElementById('mobile-menu-btn')?.addEventListener('click', () => {
+      document.getElementById('main-nav')?.classList.toggle('nav-open');
+    });
+
+    /* ── Intersection Observer for animations ─────────────── */
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animated');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('.animate-slide-up, .animate-fade-in').forEach(el => {
+      observer.observe(el);
+    });
+  </script>
+</body>
+</html>

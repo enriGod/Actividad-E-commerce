@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <title>Recuperar Contraseña — E-Market</title>
+  <meta name="description" content="Restablece tu contraseña de E-Market de forma segura.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/pages.css">
+  <link rel="manifest" href="../manifest.json">
+  <!-- Prevent FOUC -->
+  <script>
+    {
+      const t = localStorage.getItem('emarket_theme');
+      if (t) document.documentElement.setAttribute('data-theme', t);
+      else if (window.matchMedia('(prefers-color-scheme: dark)').matches)
+        document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  </script>
+</head>
+<body>
+
+  <!-- ═══════════════════════ NAVBAR ═══════════════════════ -->
+  <header class="navbar" id="main-navbar">
+    <div class="navbar-container">
+      <a href="/index.html" class="navbar-brand">
+        <span class="brand-icon">🛒</span>
+        <span class="brand-text">E-Market</span>
+      </a>
+      <nav class="navbar-nav" id="main-nav">
+        <a href="/index.html" class="nav-link">Inicio</a>
+        <a href="/pages/catalog.html" class="nav-link">Catálogo</a>
+        <a href="/pages/cart.html" class="nav-link nav-cart">
+          🛍️ Carrito <span class="cart-badge" id="cart-badge">0</span>
+        </a>
+      </nav>
+      <div class="navbar-actions">
+        <button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema">
+          <span class="theme-icon">🌙</span>
+        </button>
+        <div class="user-menu" id="user-menu">
+          <button class="user-menu-btn" id="user-menu-btn">👤</button>
+          <div class="user-dropdown" id="user-dropdown"></div>
+        </div>
+        <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menú">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════ RECOVERY SECTION ═══════════════════════ -->
+  <main class="auth-page">
+    <div class="auth-container animate-fade-in">
+      <div class="auth-card glass-card">
+
+        <!-- Brand header -->
+        <div class="auth-header">
+          <span class="auth-logo">🔑</span>
+          <h1 class="auth-title">Recuperar Contraseña</h1>
+          <p class="auth-subtitle">Ingresa tu correo para restablecer tu contraseña</p>
+        </div>
+
+        <!-- ─── STEP 1: Find Account ─── -->
+        <form class="auth-form" id="step-find" autocomplete="on">
+          <div class="form-group">
+            <label for="recovery-email" class="form-label">Correo Electrónico</label>
+            <div class="input-wrapper">
+              <span class="input-icon">📧</span>
+              <input
+                type="email"
+                id="recovery-email"
+                class="input"
+                placeholder="tu@email.com"
+                required
+                autocomplete="email"
+              >
+            </div>
+            <span class="form-error" id="recovery-email-error"></span>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block" id="find-btn">
+            <span class="btn-text">Buscar Cuenta</span>
+            <span class="btn-loader" hidden>⏳</span>
+          </button>
+
+          <div class="form-message error" id="find-error" hidden></div>
+
+          <div class="form-footer">
+            <a href="login.html" class="form-link">← Volver al inicio de sesión</a>
+          </div>
+        </form>
+
+        <!-- ─── STEP 2: Reset Password ─── -->
+        <form class="auth-form" id="step-reset" hidden autocomplete="off">
+          <div class="step-info">
+            <p class="step-account">
+              Cuenta encontrada: <strong id="found-email"></strong>
+            </p>
+          </div>
+
+          <div class="form-group">
+            <label for="new-password" class="form-label">Nueva Contraseña</label>
+            <div class="input-wrapper">
+              <span class="input-icon">🔒</span>
+              <input
+                type="password"
+                id="new-password"
+                class="input"
+                placeholder="Mín. 6 caracteres"
+                required
+                minlength="6"
+                autocomplete="new-password"
+              >
+              <button type="button" class="password-toggle" id="toggle-new-pw" aria-label="Mostrar contraseña">👁️</button>
+            </div>
+            <span class="form-error" id="new-password-error"></span>
+            <!-- Strength meter -->
+            <div class="password-strength" id="pw-strength">
+              <div class="strength-bar">
+                <div class="strength-fill" id="new-strength-fill"></div>
+              </div>
+              <span class="strength-label" id="new-strength-label"></span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="confirm-new-password" class="form-label">Confirmar Nueva Contraseña</label>
+            <div class="input-wrapper">
+              <span class="input-icon">🔒</span>
+              <input
+                type="password"
+                id="confirm-new-password"
+                class="input"
+                placeholder="Repite tu contraseña"
+                required
+                autocomplete="new-password"
+              >
+              <button type="button" class="password-toggle" id="toggle-confirm-pw" aria-label="Mostrar contraseña">👁️</button>
+            </div>
+            <span class="form-error" id="confirm-new-password-error"></span>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block" id="reset-btn">
+            <span class="btn-text">Restablecer Contraseña</span>
+            <span class="btn-loader" hidden>⏳</span>
+          </button>
+
+          <div class="form-message error" id="reset-error" hidden></div>
+        </form>
+
+        <!-- ─── STEP 3: Success ─── -->
+        <div class="auth-form" id="step-success" hidden>
+          <div class="success-state">
+            <span class="success-icon">✅</span>
+            <h2 class="success-title">¡Contraseña Restablecida!</h2>
+            <p class="success-text">Tu contraseña ha sido actualizada correctamente. Ya puedes iniciar sesión con tu nueva contraseña.</p>
+            <a href="login.html" class="btn btn-primary btn-block">Ir a Iniciar Sesión</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- ═══════════════════════ FOOTER ═══════════════════════ -->
+  <footer class="footer" id="main-footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <span class="brand-icon">🛒</span>
+        <span class="brand-text">E-Market</span>
+        <p class="footer-tagline">Tu tienda premium online</p>
+      </div>
+      <div class="footer-links">
+        <h4>Navegación</h4>
+        <a href="/index.html">Inicio</a>
+        <a href="/pages/catalog.html">Catálogo</a>
+        <a href="/pages/cart.html">Carrito</a>
+      </div>
+      <div class="footer-links">
+        <h4>Legal</h4>
+        <a href="#">Política de Privacidad</a>
+        <a href="#">Términos y Condiciones</a>
+        <a href="#">Contacto</a>
+      </div>
+      <div class="footer-social">
+        <h4>Síguenos</h4>
+        <div class="social-icons">
+          <a href="#" aria-label="Facebook">📘</a>
+          <a href="#" aria-label="Instagram">📷</a>
+          <a href="#" aria-label="Twitter">🐦</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 E-Market. Todos los derechos reservados.</p>
+      <div class="connection-status" id="connection-status">
+        <span class="status-dot online"></span>
+        <span class="status-text">Online</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- ═══════════════════════ JS MODULES ═══════════════════════ -->
+  <script type="module">
+    import { initTheme } from '../js/theme.js';
+    import { updateCartBadge, updateUserMenu } from '../js/auth.js';
+    import { initOfflineDetection } from '../js/offline.js';
+    import { showToast } from '../js/utils.js';
+    import { Store } from '../js/store.js';
+
+    /* ── Init ─────────────────────────────────────────────── */
+    initTheme();
+    updateUserMenu();
+    updateCartBadge();
+    initOfflineDetection();
+    Store.initDefaultAdmin();
+
+    /* ── References ───────────────────────────────────────── */
+    const stepFind    = document.getElementById('step-find');
+    const stepReset   = document.getElementById('step-reset');
+    const stepSuccess = document.getElementById('step-success');
+    let recoveryEmail = '';
+
+    /* ── Helper: show/hide errors ─────────────────────────── */
+    function showError(id, msg) {
+      const el = document.getElementById(id);
+      if (el) { el.textContent = msg; el.classList.add('visible'); }
+    }
+    function clearError(id) {
+      const el = document.getElementById(id);
+      if (el) { el.textContent = ''; el.classList.remove('visible'); }
+    }
+
+    /* ── Password Toggles ─────────────────────────────────── */
+    function setupToggle(btnId, inputId) {
+      const btn = document.getElementById(btnId);
+      const input = document.getElementById(inputId);
+      if (!btn || !input) return;
+      btn.addEventListener('click', () => {
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+        btn.textContent = isPassword ? '🙈' : '👁️';
+      });
+    }
+    setupToggle('toggle-new-pw', 'new-password');
+    setupToggle('toggle-confirm-pw', 'confirm-new-password');
+
+    /* ── Password Strength Meter ──────────────────────────── */
+    const newPwInput = document.getElementById('new-password');
+    const sFill  = document.getElementById('new-strength-fill');
+    const sLabel = document.getElementById('new-strength-label');
+
+    function checkStrength(pw) {
+      let score = 0;
+      if (pw.length >= 6) score++;
+      if (pw.length >= 10) score++;
+      if (/[A-Z]/.test(pw)) score++;
+      if (/[0-9]/.test(pw)) score++;
+      if (/[^A-Za-z0-9]/.test(pw)) score++;
+      return score;
+    }
+
+    newPwInput?.addEventListener('input', () => {
+      const pw = newPwInput.value;
+      const score = checkStrength(pw);
+      let pct, color, label;
+      if (score <= 1)      { pct = 20;  color = 'var(--color-danger, #f43f5e)';  label = 'Débil'; }
+      else if (score <= 3) { pct = 55;  color = 'var(--color-warning, #f59e0b)'; label = 'Media'; }
+      else                 { pct = 100; color = 'var(--color-success, #10b981)';  label = 'Fuerte'; }
+      if (sFill)  { sFill.style.width = pct + '%'; sFill.style.background = color; }
+      if (sLabel) { sLabel.textContent = pw ? label : ''; sLabel.style.color = color; }
+    });
+
+    /* ── STEP 1: Find Account ─────────────────────────────── */
+    stepFind.addEventListener('submit', (e) => {
+      e.preventDefault();
+      clearError('recovery-email-error');
+
+      const email = document.getElementById('recovery-email').value.trim();
+      if (!email) { showError('recovery-email-error', 'Ingresa tu correo'); return; }
+
+      const findBtn = document.getElementById('find-btn');
+      findBtn.disabled = true;
+      findBtn.querySelector('.btn-text').hidden = true;
+      findBtn.querySelector('.btn-loader').hidden = false;
+
+      // Simulate a brief search delay for UX
+      setTimeout(() => {
+        const users = Store.getUsers();
+        const user = users.find(u => u.email === email);
+
+        if (user) {
+          recoveryEmail = email;
+          document.getElementById('found-email').textContent = email;
+          stepFind.hidden = true;
+          stepReset.hidden = false;
+        } else {
+          const errEl = document.getElementById('find-error');
+          errEl.textContent = 'No se encontró ninguna cuenta con ese correo electrónico.';
+          errEl.hidden = false;
+        }
+
+        findBtn.disabled = false;
+        findBtn.querySelector('.btn-text').hidden = false;
+        findBtn.querySelector('.btn-loader').hidden = true;
+      }, 800);
+    });
+
+    /* ── STEP 2: Reset Password ───────────────────────────── */
+    stepReset.addEventListener('submit', (e) => {
+      e.preventDefault();
+      clearError('new-password-error');
+      clearError('confirm-new-password-error');
+
+      const newPw = document.getElementById('new-password').value;
+      const confirmPw = document.getElementById('confirm-new-password').value;
+      let valid = true;
+
+      if (newPw.length < 6) {
+        showError('new-password-error', 'Mínimo 6 caracteres');
+        valid = false;
+      }
+      if (newPw !== confirmPw) {
+        showError('confirm-new-password-error', 'Las contraseñas no coinciden');
+        valid = false;
+      }
+      if (!valid) return;
+
+      const resetBtn = document.getElementById('reset-btn');
+      resetBtn.disabled = true;
+      resetBtn.querySelector('.btn-text').hidden = true;
+      resetBtn.querySelector('.btn-loader').hidden = false;
+
+      setTimeout(() => {
+        // Update the user's password in localStorage
+        const users = Store.getUsers();
+        const idx = users.findIndex(u => u.email === recoveryEmail);
+
+        if (idx !== -1) {
+          // Simple hash for demo purposes (same as auth.js)
+          users[idx].password = simpleHash(newPw);
+          Store.setUsers(users);
+
+          stepReset.hidden = true;
+          stepSuccess.hidden = false;
+          showToast('Contraseña restablecida correctamente', 'success');
+        } else {
+          const errEl = document.getElementById('reset-error');
+          errEl.textContent = 'Error al actualizar la contraseña. Inténtalo de nuevo.';
+          errEl.hidden = false;
+        }
+
+        resetBtn.disabled = false;
+        resetBtn.querySelector('.btn-text').hidden = false;
+        resetBtn.querySelector('.btn-loader').hidden = true;
+      }, 800);
+    });
+
+    /* ── Simple hash (mirrors auth.js implementation) ─────── */
+    function simpleHash(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash |= 0; // Convert to 32-bit integer
+      }
+      return 'hash_' + Math.abs(hash).toString(36);
+    }
+
+    /* ── Real-time confirm password validation ────────────── */
+    document.getElementById('confirm-new-password')?.addEventListener('input', function () {
+      const pw = document.getElementById('new-password').value;
+      const errEl = document.getElementById('confirm-new-password-error');
+      if (this.value && this.value !== pw) {
+        errEl.textContent = 'Las contraseñas no coinciden';
+        errEl.classList.add('visible');
+      } else {
+        errEl.textContent = '';
+        errEl.classList.remove('visible');
+      }
+    });
+
+    /* ── Mobile Menu ──────────────────────────────────────── */
+    document.getElementById('mobile-menu-btn')?.addEventListener('click', () => {
+      document.getElementById('main-nav')?.classList.toggle('nav-open');
+    });
+  </script>
+</body>
+</html>

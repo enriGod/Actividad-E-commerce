@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <title>Iniciar Sesión — E-Market</title>
+  <meta name="description" content="Inicia sesión o crea tu cuenta en E-Market para acceder a productos exclusivos y ofertas especiales.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/pages.css">
+  <link rel="manifest" href="../manifest.json">
+  <!-- Prevent FOUC -->
+  <script>
+    {
+      const t = localStorage.getItem('emarket_theme');
+      if (t) document.documentElement.setAttribute('data-theme', t);
+      else if (window.matchMedia('(prefers-color-scheme: dark)').matches)
+        document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  </script>
+</head>
+<body>
+
+  <!-- ═══════════════════════ NAVBAR ═══════════════════════ -->
+  <header class="navbar" id="main-navbar">
+    <div class="navbar-container">
+      <a href="/index.html" class="navbar-brand">
+        <span class="brand-icon">🛒</span>
+        <span class="brand-text">E-Market</span>
+      </a>
+      <nav class="navbar-nav" id="main-nav">
+        <a href="/index.html" class="nav-link">Inicio</a>
+        <a href="/pages/catalog.html" class="nav-link">Catálogo</a>
+        <a href="/pages/cart.html" class="nav-link nav-cart">
+          🛍️ Carrito <span class="cart-badge" id="cart-badge">0</span>
+        </a>
+      </nav>
+      <div class="navbar-actions">
+        <button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema">
+          <span class="theme-icon">🌙</span>
+        </button>
+        <div class="user-menu" id="user-menu">
+          <button class="user-menu-btn" id="user-menu-btn">👤</button>
+          <div class="user-dropdown" id="user-dropdown"></div>
+        </div>
+        <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menú">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════ AUTH SECTION ═══════════════════════ -->
+  <main class="auth-page">
+    <div class="auth-container animate-fade-in">
+      <div class="auth-card glass-card">
+
+        <!-- Brand header -->
+        <div class="auth-header">
+          <span class="auth-logo">🛒</span>
+          <h1 class="auth-title">Bienvenido a E-Market</h1>
+        </div>
+
+        <!-- Tab switcher -->
+        <div class="auth-tabs" role="tablist">
+          <button
+            class="auth-tab active"
+            id="tab-login"
+            role="tab"
+            aria-selected="true"
+            aria-controls="login-tab"
+            data-tab="login"
+          >Iniciar Sesión</button>
+          <button
+            class="auth-tab"
+            id="tab-register"
+            role="tab"
+            aria-selected="false"
+            aria-controls="register-tab"
+            data-tab="register"
+          >Registrarse</button>
+          <span class="tab-indicator" id="tab-indicator"></span>
+        </div>
+
+        <!-- ─── LOGIN FORM ─── -->
+        <form class="auth-form" id="login-tab" role="tabpanel" aria-labelledby="tab-login">
+          <!-- Email -->
+          <div class="form-group">
+            <label for="login-email" class="form-label">Correo Electrónico</label>
+            <div class="input-wrapper">
+              <span class="input-icon">📧</span>
+              <input
+                type="email"
+                id="login-email"
+                class="input"
+                placeholder="tu@email.com"
+                required
+                autocomplete="email"
+              >
+            </div>
+            <span class="form-error" id="login-email-error"></span>
+          </div>
+
+          <!-- Password -->
+          <div class="form-group">
+            <label for="login-password" class="form-label">Contraseña</label>
+            <div class="input-wrapper">
+              <span class="input-icon">🔒</span>
+              <input
+                type="password"
+                id="login-password"
+                class="input"
+                placeholder="Tu contraseña"
+                required
+                autocomplete="current-password"
+              >
+              <button type="button" class="password-toggle" id="toggle-login-pw" aria-label="Mostrar contraseña">👁️</button>
+            </div>
+            <span class="form-error" id="login-password-error"></span>
+          </div>
+
+          <!-- Recovery link -->
+          <div class="form-actions-row">
+            <a href="recovery.html" class="form-link">¿Olvidé mi contraseña?</a>
+          </div>
+
+          <!-- Submit -->
+          <button type="submit" class="btn btn-primary btn-block" id="login-submit">
+            <span class="btn-text">Iniciar Sesión</span>
+            <span class="btn-loader" hidden>⏳</span>
+          </button>
+
+          <!-- General error -->
+          <div class="form-message error" id="login-general-error" hidden></div>
+        </form>
+
+        <!-- ─── REGISTER FORM ─── -->
+        <form class="auth-form" id="register-tab" role="tabpanel" aria-labelledby="tab-register" hidden>
+          <!-- Name -->
+          <div class="form-group">
+            <label for="register-name" class="form-label">Nombre Completo</label>
+            <div class="input-wrapper">
+              <span class="input-icon">👤</span>
+              <input
+                type="text"
+                id="register-name"
+                class="input"
+                placeholder="Tu nombre"
+                required
+                autocomplete="name"
+              >
+            </div>
+            <span class="form-error" id="register-name-error"></span>
+          </div>
+
+          <!-- Email -->
+          <div class="form-group">
+            <label for="register-email" class="form-label">Correo Electrónico</label>
+            <div class="input-wrapper">
+              <span class="input-icon">📧</span>
+              <input
+                type="email"
+                id="register-email"
+                class="input"
+                placeholder="tu@email.com"
+                required
+                autocomplete="email"
+              >
+            </div>
+            <span class="form-error" id="register-email-error"></span>
+          </div>
+
+          <!-- Password -->
+          <div class="form-group">
+            <label for="register-password" class="form-label">Contraseña</label>
+            <div class="input-wrapper">
+              <span class="input-icon">🔒</span>
+              <input
+                type="password"
+                id="register-password"
+                class="input"
+                placeholder="Mín. 6 caracteres"
+                required
+                minlength="6"
+                autocomplete="new-password"
+              >
+              <button type="button" class="password-toggle" id="toggle-register-pw" aria-label="Mostrar contraseña">👁️</button>
+            </div>
+            <span class="form-error" id="register-password-error"></span>
+            <!-- Strength meter -->
+            <div class="password-strength" id="password-strength">
+              <div class="strength-bar">
+                <div class="strength-fill" id="strength-fill"></div>
+              </div>
+              <span class="strength-label" id="strength-label"></span>
+            </div>
+          </div>
+
+          <!-- Confirm Password -->
+          <div class="form-group">
+            <label for="register-confirm" class="form-label">Confirmar Contraseña</label>
+            <div class="input-wrapper">
+              <span class="input-icon">🔒</span>
+              <input
+                type="password"
+                id="register-confirm"
+                class="input"
+                placeholder="Repite tu contraseña"
+                required
+                autocomplete="new-password"
+              >
+              <button type="button" class="password-toggle" id="toggle-register-confirm" aria-label="Mostrar contraseña">👁️</button>
+            </div>
+            <span class="form-error" id="register-confirm-error"></span>
+          </div>
+
+          <!-- Submit -->
+          <button type="submit" class="btn btn-primary btn-block" id="register-submit">
+            <span class="btn-text">Crear Cuenta</span>
+            <span class="btn-loader" hidden>⏳</span>
+          </button>
+
+          <!-- General error -->
+          <div class="form-message error" id="register-general-error" hidden></div>
+        </form>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- ═══════════════════════ FOOTER ═══════════════════════ -->
+  <footer class="footer" id="main-footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <span class="brand-icon">🛒</span>
+        <span class="brand-text">E-Market</span>
+        <p class="footer-tagline">Tu tienda premium online</p>
+      </div>
+      <div class="footer-links">
+        <h4>Navegación</h4>
+        <a href="/index.html">Inicio</a>
+        <a href="/pages/catalog.html">Catálogo</a>
+        <a href="/pages/cart.html">Carrito</a>
+      </div>
+      <div class="footer-links">
+        <h4>Legal</h4>
+        <a href="#">Política de Privacidad</a>
+        <a href="#">Términos y Condiciones</a>
+        <a href="#">Contacto</a>
+      </div>
+      <div class="footer-social">
+        <h4>Síguenos</h4>
+        <div class="social-icons">
+          <a href="#" aria-label="Facebook">📘</a>
+          <a href="#" aria-label="Instagram">📷</a>
+          <a href="#" aria-label="Twitter">🐦</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 E-Market. Todos los derechos reservados.</p>
+      <div class="connection-status" id="connection-status">
+        <span class="status-dot online"></span>
+        <span class="status-text">Online</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- ═══════════════════════ JS MODULES ═══════════════════════ -->
+  <script type="module">
+    import { initTheme } from '../js/theme.js';
+    import { updateCartBadge, updateUserMenu, login, register } from '../js/auth.js';
+    import { initOfflineDetection } from '../js/offline.js';
+    import { showToast } from '../js/utils.js';
+    import { Store } from '../js/store.js';
+
+    /* ── Init ─────────────────────────────────────────────── */
+    initTheme();
+    updateUserMenu();
+    updateCartBadge();
+    initOfflineDetection();
+    Store.initDefaultAdmin();
+
+    /* If already logged in, redirect */
+    const session = Store.getSession();
+    if (session) {
+      window.location.href = session.role === 'admin' ? 'admin-dashboard.html' : '/index.html';
+    }
+
+    /* ── Tab Switching ────────────────────────────────────── */
+    const tabs = document.querySelectorAll('.auth-tab');
+    const loginPanel = document.getElementById('login-tab');
+    const registerPanel = document.getElementById('register-tab');
+    const indicator = document.getElementById('tab-indicator');
+
+    function switchTab(target) {
+      tabs.forEach(t => {
+        const isActive = t.dataset.tab === target;
+        t.classList.toggle('active', isActive);
+        t.setAttribute('aria-selected', isActive);
+      });
+      if (target === 'login') {
+        loginPanel.hidden = false;
+        registerPanel.hidden = true;
+      } else {
+        loginPanel.hidden = true;
+        registerPanel.hidden = false;
+      }
+      positionIndicator();
+    }
+
+    function positionIndicator() {
+      const active = document.querySelector('.auth-tab.active');
+      if (active && indicator) {
+        indicator.style.width = active.offsetWidth + 'px';
+        indicator.style.left = active.offsetLeft + 'px';
+      }
+    }
+
+    tabs.forEach(tab => tab.addEventListener('click', () => switchTab(tab.dataset.tab)));
+    window.addEventListener('resize', positionIndicator);
+    // Set initial position after paint
+    requestAnimationFrame(positionIndicator);
+
+    /* ── Helper: clear all errors ─────────────────────────── */
+    function clearErrors(prefix) {
+      document.querySelectorAll(`[id^="${prefix}"][id$="-error"]`).forEach(el => {
+        el.textContent = '';
+        el.classList.remove('visible');
+      });
+      const general = document.getElementById(`${prefix}-general-error`);
+      if (general) { general.textContent = ''; general.hidden = true; }
+    }
+
+    function showError(id, msg) {
+      const el = document.getElementById(id);
+      if (el) { el.textContent = msg; el.classList.add('visible'); }
+    }
+
+    /* ── Password Visibility Toggles ──────────────────────── */
+    function setupToggle(btnId, inputId) {
+      const btn = document.getElementById(btnId);
+      const input = document.getElementById(inputId);
+      if (!btn || !input) return;
+      btn.addEventListener('click', () => {
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+        btn.textContent = isPassword ? '🙈' : '👁️';
+        btn.setAttribute('aria-label', isPassword ? 'Ocultar contraseña' : 'Mostrar contraseña');
+      });
+    }
+    setupToggle('toggle-login-pw', 'login-password');
+    setupToggle('toggle-register-pw', 'register-password');
+    setupToggle('toggle-register-confirm', 'register-confirm');
+
+    /* ── Password Strength Meter ──────────────────────────── */
+    const registerPw = document.getElementById('register-password');
+    const strengthFill = document.getElementById('strength-fill');
+    const strengthLabel = document.getElementById('strength-label');
+
+    function checkStrength(pw) {
+      let score = 0;
+      if (pw.length >= 6) score++;
+      if (pw.length >= 10) score++;
+      if (/[A-Z]/.test(pw)) score++;
+      if (/[0-9]/.test(pw)) score++;
+      if (/[^A-Za-z0-9]/.test(pw)) score++;
+      return score; // 0-5
+    }
+
+    registerPw?.addEventListener('input', () => {
+      const pw = registerPw.value;
+      const score = checkStrength(pw);
+      let pct, color, label;
+
+      if (score <= 1) {
+        pct = 20; color = 'var(--color-danger, #f43f5e)'; label = 'Débil';
+      } else if (score <= 3) {
+        pct = 55; color = 'var(--color-warning, #f59e0b)'; label = 'Media';
+      } else {
+        pct = 100; color = 'var(--color-success, #10b981)'; label = 'Fuerte';
+      }
+
+      if (strengthFill) {
+        strengthFill.style.width = pct + '%';
+        strengthFill.style.background = color;
+      }
+      if (strengthLabel) {
+        strengthLabel.textContent = pw ? label : '';
+        strengthLabel.style.color = color;
+      }
+    });
+
+    /* ── Login Form ───────────────────────────────────────── */
+    loginPanel.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearErrors('login');
+
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      let valid = true;
+
+      if (!email) { showError('login-email-error', 'El correo es obligatorio'); valid = false; }
+      if (!password) { showError('login-password-error', 'La contraseña es obligatoria'); valid = false; }
+      if (!valid) return;
+
+      const submitBtn = document.getElementById('login-submit');
+      submitBtn.disabled = true;
+      submitBtn.querySelector('.btn-text').hidden = true;
+      submitBtn.querySelector('.btn-loader').hidden = false;
+
+      try {
+        const result = login(email, password);
+        if (result.success) {
+          showToast('¡Bienvenido!', 'success');
+          // Short delay so the toast is visible
+          setTimeout(() => {
+            window.location.href = result.user.role === 'admin' ? 'admin-dashboard.html' : '/index.html';
+          }, 600);
+        } else {
+          const generalErr = document.getElementById('login-general-error');
+          generalErr.textContent = result.message || 'Credenciales incorrectas';
+          generalErr.hidden = false;
+          submitBtn.disabled = false;
+          submitBtn.querySelector('.btn-text').hidden = false;
+          submitBtn.querySelector('.btn-loader').hidden = true;
+        }
+      } catch (err) {
+        const generalErr = document.getElementById('login-general-error');
+        generalErr.textContent = 'Ocurrió un error inesperado';
+        generalErr.hidden = false;
+        submitBtn.disabled = false;
+        submitBtn.querySelector('.btn-text').hidden = false;
+        submitBtn.querySelector('.btn-loader').hidden = true;
+      }
+    });
+
+    /* ── Register Form ────────────────────────────────────── */
+    registerPanel.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearErrors('register');
+
+      const name = document.getElementById('register-name').value.trim();
+      const email = document.getElementById('register-email').value.trim();
+      const password = document.getElementById('register-password').value;
+      const confirm = document.getElementById('register-confirm').value;
+      let valid = true;
+
+      if (!name) { showError('register-name-error', 'El nombre es obligatorio'); valid = false; }
+      if (!email) { showError('register-email-error', 'El correo es obligatorio'); valid = false; }
+      if (password.length < 6) { showError('register-password-error', 'Mínimo 6 caracteres'); valid = false; }
+      if (password !== confirm) { showError('register-confirm-error', 'Las contraseñas no coinciden'); valid = false; }
+      if (!valid) return;
+
+      const submitBtn = document.getElementById('register-submit');
+      submitBtn.disabled = true;
+      submitBtn.querySelector('.btn-text').hidden = true;
+      submitBtn.querySelector('.btn-loader').hidden = false;
+
+      try {
+        const result = register(name, email, password);
+        if (result.success) {
+          showToast('¡Cuenta creada exitosamente! Inicia sesión.', 'success');
+          // Switch to login tab
+          document.getElementById('register-name').value = '';
+          document.getElementById('register-email').value = '';
+          document.getElementById('register-password').value = '';
+          document.getElementById('register-confirm').value = '';
+          switchTab('login');
+          // Pre-fill email in login
+          document.getElementById('login-email').value = email;
+        } else {
+          const generalErr = document.getElementById('register-general-error');
+          generalErr.textContent = result.message || 'No se pudo crear la cuenta';
+          generalErr.hidden = false;
+        }
+      } catch (err) {
+        const generalErr = document.getElementById('register-general-error');
+        generalErr.textContent = 'Ocurrió un error inesperado';
+        generalErr.hidden = false;
+      }
+
+      submitBtn.disabled = false;
+      submitBtn.querySelector('.btn-text').hidden = false;
+      submitBtn.querySelector('.btn-loader').hidden = true;
+    });
+
+    /* ── Real-time validation on register inputs ──────────── */
+    document.getElementById('register-confirm')?.addEventListener('input', function () {
+      const pw = document.getElementById('register-password').value;
+      const errEl = document.getElementById('register-confirm-error');
+      if (this.value && this.value !== pw) {
+        errEl.textContent = 'Las contraseñas no coinciden';
+        errEl.classList.add('visible');
+      } else {
+        errEl.textContent = '';
+        errEl.classList.remove('visible');
+      }
+    });
+
+    document.getElementById('register-email')?.addEventListener('blur', function () {
+      const errEl = document.getElementById('register-email-error');
+      if (this.value && !this.validity.valid) {
+        errEl.textContent = 'Ingresa un correo válido';
+        errEl.classList.add('visible');
+      } else {
+        errEl.textContent = '';
+        errEl.classList.remove('visible');
+      }
+    });
+
+    /* ── Mobile Menu ──────────────────────────────────────── */
+    document.getElementById('mobile-menu-btn')?.addEventListener('click', () => {
+      document.getElementById('main-nav')?.classList.toggle('nav-open');
+    });
+  </script>
+</body>
+</html>

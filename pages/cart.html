@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <title>Carrito — E-Market</title>
+  <meta name="description" content="Tu carrito de compras en E-Market">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/pages.css">
+  <link rel="manifest" href="../manifest.json">
+  <script>
+    {
+      const t = localStorage.getItem('emarket_theme');
+      if (t) document.documentElement.setAttribute('data-theme', t);
+      else if (window.matchMedia('(prefers-color-scheme: dark)').matches)
+        document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  </script>
+</head>
+<body>
+  <!-- Navbar -->
+  <header class="navbar" id="main-navbar">
+    <div class="navbar-container">
+      <a href="../index.html" class="navbar-brand">
+        <span class="brand-icon">🛒</span>
+        <span class="brand-text">E-Market</span>
+      </a>
+      <nav class="navbar-nav" id="main-nav">
+        <a href="../index.html" class="nav-link">Inicio</a>
+        <a href="catalog.html" class="nav-link">Catálogo</a>
+        <a href="cart.html" class="nav-link nav-cart active">
+          🛍️ Carrito <span class="cart-badge" id="cart-badge">0</span>
+        </a>
+      </nav>
+      <div class="navbar-actions">
+        <button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema">
+          <span class="theme-icon">🌙</span>
+        </button>
+        <div class="user-menu" id="user-menu">
+          <button class="user-menu-btn" id="user-menu-btn">👤</button>
+          <div class="user-dropdown" id="user-dropdown"></div>
+        </div>
+        <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menú">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="page-content">
+    <div class="container">
+      <h1 class="section-title animate-fade-in">Tu Carrito de Compras</h1>
+
+      <div class="cart-layout" id="cart-layout">
+        <!-- Cart Items -->
+        <div class="cart-items" id="cart-items">
+          <!-- JS populates -->
+        </div>
+
+        <!-- Cart Summary -->
+        <aside class="cart-summary" id="cart-summary">
+          <div class="card card-glass">
+            <h3 class="cart-summary-title">Resumen del Pedido</h3>
+            <div class="summary-row">
+              <span>Artículos</span>
+              <span id="summary-count">0</span>
+            </div>
+            <div class="summary-row">
+              <span>Subtotal</span>
+              <span id="summary-subtotal">$0.00</span>
+            </div>
+            <div class="summary-row">
+              <span>Envío</span>
+              <span id="summary-shipping">$4.99</span>
+            </div>
+            <div class="divider"></div>
+            <div class="summary-row summary-total">
+              <span>Total</span>
+              <span class="price-tag" id="summary-total">$0.00</span>
+            </div>
+            <button class="btn btn-primary btn-block btn-lg" id="btn-checkout">Proceder al Checkout</button>
+            <a href="catalog.html" class="btn btn-secondary btn-block" style="margin-top:0.5rem;text-align:center">Seguir Comprando</a>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer" id="main-footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <span class="brand-icon">🛒</span>
+        <span class="brand-text">E-Market</span>
+        <p class="footer-tagline">Tu tienda premium online</p>
+      </div>
+      <div class="footer-links">
+        <h4>Navegación</h4>
+        <a href="../index.html">Inicio</a>
+        <a href="catalog.html">Catálogo</a>
+        <a href="cart.html">Carrito</a>
+      </div>
+      <div class="footer-links">
+        <h4>Legal</h4>
+        <a href="#">Política de Privacidad</a>
+        <a href="#">Términos y Condiciones</a>
+      </div>
+      <div class="footer-social">
+        <h4>Síguenos</h4>
+        <div class="social-icons">
+          <a href="#" aria-label="Facebook">📘</a>
+          <a href="#" aria-label="Instagram">📷</a>
+          <a href="#" aria-label="Twitter">🐦</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 E-Market. Todos los derechos reservados.</p>
+      <div class="connection-status" id="connection-status">
+        <span class="status-dot online"></span>
+        <span class="status-text">Online</span>
+      </div>
+    </div>
+  </footer>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <script type="module">
+    import { initTheme } from '../js/theme.js';
+    import { updateCartBadge, updateUserMenu, isLoggedIn } from '../js/auth.js';
+    import { initOfflineDetection } from '../js/offline.js';
+    import { getCart, removeFromCart, increaseQuantity, decreaseQuantity, cloneItem, getCartTotal, getCartCount } from '../js/cart.js';
+    import { Store } from '../js/store.js';
+    import { formatCurrency, sanitizeHTML, showToast } from '../js/utils.js';
+
+    initTheme();
+    updateUserMenu();
+    updateCartBadge();
+    initOfflineDetection();
+
+    function renderCart() {
+      const cart = getCart();
+      const itemsContainer = document.getElementById('cart-items');
+      const summaryEl = document.getElementById('cart-summary');
+
+      if (cart.length === 0) {
+        itemsContainer.innerHTML = `
+          <div class="empty-state animate-fade-in">
+            <p style="font-size:4rem">🛒</p>
+            <h3>Tu carrito está vacío</h3>
+            <p>¡Explora nuestro catálogo y encuentra productos increíbles!</p>
+            <a href="catalog.html" class="btn btn-primary btn-lg" style="margin-top:1rem">Explorar Catálogo</a>
+          </div>`;
+        summaryEl.style.display = 'none';
+        return;
+      }
+
+      summaryEl.style.display = 'block';
+
+      itemsContainer.innerHTML = cart.map((item, index) => `
+        <div class="cart-item card animate-slide-up stagger-${(index % 4) + 1}" data-product-id="${item.id}">
+          <div class="cart-item-image">
+            <img src="${sanitizeHTML(item.image)}" alt="${sanitizeHTML(item.title)}">
+          </div>
+          <div class="cart-item-info">
+            <h3 class="cart-item-title">${sanitizeHTML(item.title)}</h3>
+            <span class="chip">${sanitizeHTML(item.category)}</span>
+            <p class="cart-item-unit-price">${formatCurrency(item.price)} c/u</p>
+          </div>
+          <div class="cart-item-controls">
+            <div class="qty-controls">
+              <button class="btn btn-icon btn-sm btn-qty-minus" data-id="${item.id}">−</button>
+              <span class="qty-value">${item.quantity}</span>
+              <button class="btn btn-icon btn-sm btn-qty-plus" data-id="${item.id}">+</button>
+            </div>
+            <button class="btn btn-sm btn-secondary btn-clone" data-id="${item.id}" title="Clonar">📋 Clonar</button>
+          </div>
+          <div class="cart-item-subtotal">
+            <p class="price-tag">${formatCurrency(item.price * item.quantity)}</p>
+            <button class="btn btn-icon btn-sm btn-danger btn-remove" data-id="${item.id}" title="Eliminar">✕</button>
+          </div>
+        </div>
+      `).join('');
+
+      // Update summary
+      const total = getCartTotal();
+      const count = getCartCount();
+      const shipping = total > 50 ? 0 : 4.99;
+
+      document.getElementById('summary-count').textContent = count;
+      document.getElementById('summary-subtotal').textContent = formatCurrency(total);
+      document.getElementById('summary-shipping').textContent = shipping === 0 ? 'Gratis 🎉' : formatCurrency(shipping);
+      document.getElementById('summary-total').textContent = formatCurrency(total + shipping);
+
+      // Event handlers
+      itemsContainer.querySelectorAll('.btn-qty-minus').forEach(btn => {
+        btn.addEventListener('click', () => {
+          decreaseQuantity(parseInt(btn.dataset.id));
+          renderCart();
+          updateCartBadge();
+        });
+      });
+      itemsContainer.querySelectorAll('.btn-qty-plus').forEach(btn => {
+        btn.addEventListener('click', () => {
+          increaseQuantity(parseInt(btn.dataset.id));
+          renderCart();
+          updateCartBadge();
+        });
+      });
+      itemsContainer.querySelectorAll('.btn-clone').forEach(btn => {
+        btn.addEventListener('click', () => {
+          cloneItem(parseInt(btn.dataset.id));
+          renderCart();
+          updateCartBadge();
+        });
+      });
+      itemsContainer.querySelectorAll('.btn-remove').forEach(btn => {
+        btn.addEventListener('click', () => {
+          removeFromCart(parseInt(btn.dataset.id));
+          renderCart();
+          updateCartBadge();
+          showToast('Producto eliminado del carrito', 'info');
+        });
+      });
+    }
+
+    // Checkout button
+    document.getElementById('btn-checkout').addEventListener('click', () => {
+      if (!isLoggedIn()) {
+        showToast('Debes iniciar sesión para continuar', 'warning');
+        window.location.href = 'login.html?redirect=checkout';
+        return;
+      }
+      window.location.href = 'checkout.html';
+    });
+
+    // Mobile menu
+    document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+      document.getElementById('main-nav').classList.toggle('nav-open');
+    });
+
+    // Listen for cart updates
+    Store.on('cart-updated', () => { renderCart(); updateCartBadge(); });
+
+    renderCart();
+  </script>
+</body>
+</html>

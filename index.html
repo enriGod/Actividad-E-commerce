@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <title>E-Market — Tu Tienda Premium Online</title>
+  <meta name="description" content="Descubre productos exclusivos con la mejor calidad al mejor precio en E-Market. Envío gratis, garantía total y soporte 24/7.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <link rel="manifest" href="manifest.json">
+  <!-- Prevent FOUC: apply saved theme before first paint -->
+  <script>
+    {
+      const t = localStorage.getItem('emarket_theme');
+      if (t) document.documentElement.setAttribute('data-theme', t);
+      else if (window.matchMedia('(prefers-color-scheme: dark)').matches)
+        document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  </script>
+</head>
+<body>
+
+  <!-- ═══════════════════════ NAVBAR ═══════════════════════ -->
+  <header class="navbar" id="main-navbar">
+    <div class="navbar-container">
+      <a href="/index.html" class="navbar-brand">
+        <span class="brand-icon">🛒</span>
+        <span class="brand-text">E-Market</span>
+      </a>
+      <nav class="navbar-nav" id="main-nav">
+        <a href="/index.html" class="nav-link active">Inicio</a>
+        <a href="/pages/catalog.html" class="nav-link">Catálogo</a>
+        <a href="/pages/cart.html" class="nav-link nav-cart">
+          🛍️ Carrito <span class="cart-badge" id="cart-badge">0</span>
+        </a>
+      </nav>
+      <div class="navbar-actions">
+        <button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema">
+          <span class="theme-icon">🌙</span>
+        </button>
+        <div class="user-menu" id="user-menu">
+          <button class="user-menu-btn" id="user-menu-btn">👤</button>
+          <div class="user-dropdown" id="user-dropdown"></div>
+        </div>
+        <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menú">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════ HERO ═══════════════════════ -->
+  <section class="hero" id="hero-section">
+    <!-- Decorative floating shapes rendered via CSS pseudo-elements on .hero -->
+    <div class="hero-bg-shapes" aria-hidden="true">
+      <div class="shape shape-1"></div>
+      <div class="shape shape-2"></div>
+      <div class="shape shape-3"></div>
+      <div class="shape shape-4"></div>
+      <div class="shape shape-5"></div>
+    </div>
+
+    <div class="hero-content animate-fade-in">
+      <h1 class="hero-title">
+        <span class="gradient-text">Descubre el Estilo</span>
+        <span class="gradient-text">que te Define</span>
+      </h1>
+      <p class="hero-subtitle">
+        Productos exclusivos con la mejor calidad al mejor precio
+      </p>
+      <a href="pages/catalog.html" class="btn btn-primary btn-lg hero-cta">
+        Explorar Catálogo →
+      </a>
+    </div>
+
+    <!-- Scroll indicator -->
+    <div class="scroll-indicator" aria-hidden="true">
+      <span class="scroll-arrow">↓</span>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ BENEFITS ═══════════════════════ -->
+  <section class="benefits-section section" id="benefits-section">
+    <div class="container">
+      <h2 class="section-title animate-slide-up">¿Por qué elegir E-Market?</h2>
+      <div class="benefits-grid">
+        <div class="benefit-card glass-card animate-slide-up stagger-1">
+          <span class="benefit-icon">🚚</span>
+          <h3 class="benefit-title">Envío Gratis</h3>
+          <p class="benefit-desc">En todos los pedidos mayores a $50</p>
+        </div>
+        <div class="benefit-card glass-card animate-slide-up stagger-2">
+          <span class="benefit-icon">🛡️</span>
+          <h3 class="benefit-title">Garantía Total</h3>
+          <p class="benefit-desc">Devolución en 30 días sin preguntas</p>
+        </div>
+        <div class="benefit-card glass-card animate-slide-up stagger-3">
+          <span class="benefit-icon">💳</span>
+          <h3 class="benefit-title">Pago Seguro</h3>
+          <p class="benefit-desc">Tus datos siempre protegidos</p>
+        </div>
+        <div class="benefit-card glass-card animate-slide-up stagger-4">
+          <span class="benefit-icon">📞</span>
+          <h3 class="benefit-title">Soporte 24/7</h3>
+          <p class="benefit-desc">Estamos aquí cuando nos necesites</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ FEATURED PRODUCTS ═══════════════════════ -->
+  <section class="featured-section section" id="featured-section">
+    <div class="container">
+      <h2 class="section-title animate-slide-up">Productos Destacados</h2>
+      <div class="products-grid" id="featured-products">
+        <!-- Skeleton loaders shown until JS populates -->
+        <div class="product-card skeleton-card">
+          <div class="skeleton skeleton-img"></div>
+          <div class="skeleton skeleton-text skeleton-title"></div>
+          <div class="skeleton skeleton-text skeleton-price"></div>
+          <div class="skeleton skeleton-btn"></div>
+        </div>
+        <div class="product-card skeleton-card">
+          <div class="skeleton skeleton-img"></div>
+          <div class="skeleton skeleton-text skeleton-title"></div>
+          <div class="skeleton skeleton-text skeleton-price"></div>
+          <div class="skeleton skeleton-btn"></div>
+        </div>
+        <div class="product-card skeleton-card">
+          <div class="skeleton skeleton-img"></div>
+          <div class="skeleton skeleton-text skeleton-title"></div>
+          <div class="skeleton skeleton-text skeleton-price"></div>
+          <div class="skeleton skeleton-btn"></div>
+        </div>
+        <div class="product-card skeleton-card">
+          <div class="skeleton skeleton-img"></div>
+          <div class="skeleton skeleton-text skeleton-title"></div>
+          <div class="skeleton skeleton-text skeleton-price"></div>
+          <div class="skeleton skeleton-btn"></div>
+        </div>
+      </div>
+      <div class="section-cta animate-slide-up">
+        <a href="pages/catalog.html" class="btn btn-outline btn-lg">Ver todo el catálogo →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ TESTIMONIALS ═══════════════════════ -->
+  <section class="testimonial-section section" id="testimonials-section">
+    <div class="container">
+      <h2 class="section-title animate-slide-up">Lo que dicen nuestros clientes</h2>
+      <div class="testimonials-grid">
+
+        <div class="testimonial-card glass-card animate-slide-up stagger-1">
+          <span class="testimonial-quote" aria-hidden="true">"</span>
+          <p class="testimonial-text">
+            Increíble experiencia de compra. Los productos llegaron rápido y en perfecto estado. ¡100% recomendado!
+          </p>
+          <div class="testimonial-author">
+            <span class="testimonial-avatar">👩</span>
+            <div class="testimonial-info">
+              <span class="testimonial-name">María García</span>
+              <span class="testimonial-rating" aria-label="5 de 5 estrellas">⭐⭐⭐⭐⭐</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card glass-card animate-slide-up stagger-2">
+          <span class="testimonial-quote" aria-hidden="true">"</span>
+          <p class="testimonial-text">
+            La mejor tienda online que he usado. Interfaz elegante y proceso de compra súper fácil.
+          </p>
+          <div class="testimonial-author">
+            <span class="testimonial-avatar">👨</span>
+            <div class="testimonial-info">
+              <span class="testimonial-name">Carlos Rodríguez</span>
+              <span class="testimonial-rating" aria-label="5 de 5 estrellas">⭐⭐⭐⭐⭐</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card glass-card animate-slide-up stagger-3">
+          <span class="testimonial-quote" aria-hidden="true">"</span>
+          <p class="testimonial-text">
+            Gran variedad de productos y precios competitivos. El soporte al cliente es excelente.
+          </p>
+          <div class="testimonial-author">
+            <span class="testimonial-avatar">👩‍💼</span>
+            <div class="testimonial-info">
+              <span class="testimonial-name">Ana Martínez</span>
+              <span class="testimonial-rating" aria-label="4 de 5 estrellas">⭐⭐⭐⭐</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ NEWSLETTER ═══════════════════════ -->
+  <section class="newsletter-section section" id="newsletter-section">
+    <div class="container">
+      <div class="newsletter-content animate-fade-in">
+        <h2 class="newsletter-title">¡No te pierdas nuestras ofertas!</h2>
+        <p class="newsletter-subtitle">Suscríbete y recibe descuentos exclusivos</p>
+        <form class="newsletter-form" id="newsletter-form" autocomplete="on">
+          <div class="newsletter-input-group">
+            <input
+              type="email"
+              id="newsletter-email"
+              class="input newsletter-input"
+              placeholder="Tu correo electrónico"
+              required
+              autocomplete="email"
+              aria-label="Correo electrónico para suscripción"
+            >
+            <button type="submit" class="btn btn-primary newsletter-btn">Suscribirse</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ FOOTER ═══════════════════════ -->
+  <footer class="footer" id="main-footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <span class="brand-icon">🛒</span>
+        <span class="brand-text">E-Market</span>
+        <p class="footer-tagline">Tu tienda premium online</p>
+      </div>
+      <div class="footer-links">
+        <h4>Navegación</h4>
+        <a href="/index.html">Inicio</a>
+        <a href="/pages/catalog.html">Catálogo</a>
+        <a href="/pages/cart.html">Carrito</a>
+      </div>
+      <div class="footer-links">
+        <h4>Legal</h4>
+        <a href="#">Política de Privacidad</a>
+        <a href="#">Términos y Condiciones</a>
+        <a href="#">Contacto</a>
+      </div>
+      <div class="footer-social">
+        <h4>Síguenos</h4>
+        <div class="social-icons">
+          <a href="#" aria-label="Facebook">📘</a>
+          <a href="#" aria-label="Instagram">📷</a>
+          <a href="#" aria-label="Twitter">🐦</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 E-Market. Todos los derechos reservados.</p>
+      <div class="connection-status" id="connection-status">
+        <span class="status-dot online"></span>
+        <span class="status-text">Online</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ═══════════════════════ TOAST CONTAINER ═══════════════════════ -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- ═══════════════════════ JS MODULES ═══════════════════════ -->
+  <script type="module">
+    import { initTheme } from './js/theme.js';
+    import { updateCartBadge, updateUserMenu } from './js/auth.js';
+    import { initOfflineDetection, registerServiceWorker } from './js/offline.js';
+    import { initializeProducts } from './js/api.js';
+    import { Store } from './js/store.js';
+    import { renderProductCard } from './js/products.js';
+    import { showToast } from './js/utils.js';
+    import { addToCart } from './js/cart.js';
+
+    /* ── Initialisation ────────────────────────────────────── */
+    initTheme();
+    updateUserMenu();
+    updateCartBadge();
+    initOfflineDetection();
+    registerServiceWorker();
+    Store.initDefaultAdmin();
+
+    /* ── Featured Products ─────────────────────────────────── */
+    async function loadFeatured() {
+      await initializeProducts();
+      const products = Store.getProducts();
+      const featured = [...products].sort((a, b) => b.rating - a.rating).slice(0, 4);
+      const container = document.getElementById('featured-products');
+
+      if (featured.length) {
+        container.innerHTML = featured.map((p, i) =>
+          `<div class="animate-slide-up stagger-${i + 1}">${renderProductCard(p)}</div>`
+        ).join('');
+
+        // Wire up add-to-cart buttons
+        container.querySelectorAll('.btn-add-cart').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const id = parseInt(e.currentTarget.dataset.productId);
+            const product = products.find(p => p.id === id);
+            if (product) addToCart(product);
+          });
+        });
+      } else {
+        container.innerHTML = '<p class="empty-state">No se pudieron cargar los productos</p>';
+      }
+    }
+    loadFeatured();
+
+    /* ── Newsletter Subscription ───────────────────────────── */
+    document.getElementById('newsletter-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('newsletter-email').value.trim();
+      if (email) {
+        const emails = Store.getNewsletter();
+        if (!emails.includes(email)) {
+          emails.push(email);
+          Store.setNewsletter(emails);
+          showToast('¡Te has suscrito exitosamente!', 'success');
+        } else {
+          showToast('Ya estás suscrito', 'info');
+        }
+        e.target.reset();
+      }
+    });
+
+    /* ── Mobile Menu Toggle ────────────────────────────────── */
+    document.getElementById('mobile-menu-btn')?.addEventListener('click', () => {
+      document.getElementById('main-nav')?.classList.toggle('nav-open');
+    });
+
+    /* ── Intersection-Observer for entrance animations ─────── */
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animated');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('.animate-slide-up, .animate-fade-in').forEach(el => {
+      observer.observe(el);
+    });
+  </script>
+</body>
+</html>

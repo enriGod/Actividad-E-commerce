@@ -1,0 +1,275 @@
+/* ============================================================
+   E-Market Layout Utilities — layout.css
+   Containers, grids, flexbox helpers, sections, visibility
+   utilities, and responsive breakpoints.
+   ============================================================ */
+
+/* ----------------------------------------------------------
+   Container
+   ---------------------------------------------------------- */
+.container {
+  width: 100%;
+  max-width: var(--content-max-width);
+  margin-inline: auto;
+  padding-inline: var(--space-6);
+}
+
+.container-sm {
+  max-width: 720px;
+}
+
+.container-lg {
+  max-width: 1400px;
+}
+
+/* ----------------------------------------------------------
+   Page Content (pushes footer down)
+   ---------------------------------------------------------- */
+.page-content {
+  min-height: calc(100vh - var(--navbar-height));
+  padding-top: var(--navbar-height);
+}
+
+/* ----------------------------------------------------------
+   Section
+   ---------------------------------------------------------- */
+.section {
+  padding-block: var(--space-16);
+}
+
+.section-sm {
+  padding-block: var(--space-10);
+}
+
+.section-lg {
+  padding-block: var(--space-24);
+}
+
+/* ----------------------------------------------------------
+   Grid System
+   ---------------------------------------------------------- */
+.grid {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-6);
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-6);
+}
+
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-6);
+}
+
+/* Auto-fill grids that adapt to available space */
+.grid-auto-fill {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-6);
+}
+
+.grid-auto-fit {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-6);
+}
+
+/* ----------------------------------------------------------
+   Flexbox Helpers
+   ---------------------------------------------------------- */
+.flex {
+  display: flex;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-col-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-wrap {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.items-start {
+  align-items: flex-start;
+}
+
+.items-end {
+  align-items: flex-end;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+
+.gap-1 { gap: var(--space-1); }
+.gap-2 { gap: var(--space-2); }
+.gap-3 { gap: var(--space-3); }
+.gap-4 { gap: var(--space-4); }
+.gap-6 { gap: var(--space-6); }
+.gap-8 { gap: var(--space-8); }
+
+/* ----------------------------------------------------------
+   Text Utilities
+   ---------------------------------------------------------- */
+.text-center   { text-align: center; }
+.text-left     { text-align: left; }
+.text-right    { text-align: right; }
+
+/* ----------------------------------------------------------
+   Spacing Utilities
+   ---------------------------------------------------------- */
+.mt-4  { margin-top: var(--space-4); }
+.mt-6  { margin-top: var(--space-6); }
+.mt-8  { margin-top: var(--space-8); }
+.mb-4  { margin-bottom: var(--space-4); }
+.mb-6  { margin-bottom: var(--space-6); }
+.mb-8  { margin-bottom: var(--space-8); }
+
+.p-4   { padding: var(--space-4); }
+.p-6   { padding: var(--space-6); }
+.p-8   { padding: var(--space-8); }
+
+/* ----------------------------------------------------------
+   Width Utilities
+   ---------------------------------------------------------- */
+.w-full  { width: 100%; }
+.mx-auto { margin-inline: auto; }
+
+/* ----------------------------------------------------------
+   Visibility
+   ---------------------------------------------------------- */
+.hidden {
+  display: none !important;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Visible only on mobile (< 640px) */
+.visible-mobile {
+  display: none !important;
+}
+
+/* Visible only on desktop (> 1024px) */
+.visible-desktop {
+  display: block;
+}
+
+/* ----------------------------------------------------------
+   Responsive Breakpoints
+   ---------------------------------------------------------- */
+
+/* Tablet — max 1024px */
+@media (max-width: 1024px) {
+  .grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .section {
+    padding-block: var(--space-12);
+  }
+
+  .section-lg {
+    padding-block: var(--space-16);
+  }
+
+  .visible-desktop {
+    display: none !important;
+  }
+}
+
+/* Mobile — max 640px */
+@media (max-width: 640px) {
+  .container {
+    padding-inline: var(--space-4);
+  }
+
+  .grid-2,
+  .grid-3,
+  .grid-4 {
+    grid-template-columns: 1fr;
+  }
+
+  .grid-auto-fill,
+  .grid-auto-fit {
+    grid-template-columns: 1fr;
+  }
+
+  .section {
+    padding-block: var(--space-8);
+  }
+
+  .section-sm {
+    padding-block: var(--space-6);
+  }
+
+  .section-lg {
+    padding-block: var(--space-12);
+  }
+
+  .visible-mobile {
+    display: block !important;
+  }
+
+  /* Stack flex-between on small screens when needed */
+  .flex-between-mobile-stack {
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+}

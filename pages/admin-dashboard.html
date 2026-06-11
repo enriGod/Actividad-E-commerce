@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <title>Dashboard — Admin E-Market</title>
+  <meta name="description" content="Panel de administración E-Market">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/pages.css">
+  <script>
+    {
+      const t = localStorage.getItem('emarket_theme');
+      if (t) document.documentElement.setAttribute('data-theme', t);
+      else if (window.matchMedia('(prefers-color-scheme: dark)').matches)
+        document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  </script>
+</head>
+<body>
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar" id="admin-sidebar">
+      <div class="admin-sidebar-brand">
+        <a href="../index.html">
+          <span class="brand-icon">🛒</span>
+          <span class="brand-text">E-Market</span>
+        </a>
+        <span class="badge badge-admin">Admin</span>
+      </div>
+      <nav class="admin-nav">
+        <a href="admin-dashboard.html" class="admin-nav-link admin-nav-active" id="nav-dashboard">
+          📊 <span>Dashboard</span>
+        </a>
+        <a href="admin-products.html" class="admin-nav-link" id="nav-products">
+          📦 <span>Productos</span>
+        </a>
+        <a href="admin-sales.html" class="admin-nav-link" id="nav-sales">
+          💰 <span>Ventas</span>
+        </a>
+      </nav>
+      <div class="admin-sidebar-footer">
+        <a href="../index.html" class="admin-nav-link">🏠 <span>Ir a Tienda</span></a>
+        <button class="admin-nav-link" id="admin-logout">🚪 <span>Cerrar Sesión</span></button>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="admin-main">
+      <header class="admin-header">
+        <button class="mobile-menu-btn" id="admin-menu-btn">☰</button>
+        <h1 class="admin-title">Dashboard</h1>
+        <div class="admin-user">
+          <span id="admin-name"></span>
+          <button class="theme-toggle" id="theme-toggle"><span class="theme-icon">🌙</span></button>
+        </div>
+      </header>
+
+      <div class="admin-content">
+        <!-- Metrics Grid -->
+        <div class="admin-grid animate-fade-in">
+          <div class="admin-card admin-card-purple">
+            <div class="admin-card-icon">💰</div>
+            <div class="admin-card-value" id="metric-revenue">$0.00</div>
+            <div class="admin-card-label">Total Ingresos</div>
+          </div>
+          <div class="admin-card admin-card-pink">
+            <div class="admin-card-icon">📦</div>
+            <div class="admin-card-value" id="metric-products">0</div>
+            <div class="admin-card-label">Total Productos</div>
+          </div>
+          <div class="admin-card admin-card-cyan">
+            <div class="admin-card-icon">👥</div>
+            <div class="admin-card-value" id="metric-users">0</div>
+            <div class="admin-card-label">Usuarios Registrados</div>
+          </div>
+          <div class="admin-card admin-card-green">
+            <div class="admin-card-icon">🟢</div>
+            <div class="admin-card-value" id="metric-active">0</div>
+            <div class="admin-card-label">Usuarios Activos</div>
+          </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="admin-charts animate-slide-up stagger-2">
+          <div class="card chart-container">
+            <h3>🏆 Top 3 Productos Más Vendidos</h3>
+            <canvas id="top-products-chart" width="500" height="300"></canvas>
+            <p class="chart-empty" id="chart-empty-1" style="display:none">No hay ventas registradas aún</p>
+          </div>
+          <div class="card chart-container">
+            <h3>📊 Ventas por Estado</h3>
+            <canvas id="sales-status-chart" width="500" height="300"></canvas>
+            <p class="chart-empty" id="chart-empty-2" style="display:none">No hay ventas registradas aún</p>
+          </div>
+        </div>
+
+        <!-- Recent Orders -->
+        <div class="card animate-slide-up stagger-3" style="margin-top:1.5rem">
+          <h3 style="margin-bottom:1rem">📋 Últimas Órdenes</h3>
+          <div class="table-container">
+            <table class="table" id="recent-orders-table">
+              <thead>
+                <tr>
+                  <th>ID Orden</th>
+                  <th>Cliente</th>
+                  <th>Fecha</th>
+                  <th>Total</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody id="recent-orders-body">
+              </tbody>
+            </table>
+          </div>
+          <p class="empty-state" id="no-orders" style="display:none">No hay órdenes registradas</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <script type="module">
+    import { protectRoute, getCurrentUser, logout } from '../js/auth.js';
+    import { initTheme } from '../js/theme.js';
+    import { Store } from '../js/store.js';
+    import { getSalesMetrics, getTopProducts, renderBarChart } from '../js/admin.js';
+    import { formatCurrency, formatDate } from '../js/utils.js';
+
+    protectRoute('admin');
+    initTheme();
+
+    const user = getCurrentUser();
+    document.getElementById('admin-name').textContent = user?.name || 'Admin';
+
+    // Logout
+    document.getElementById('admin-logout').addEventListener('click', () => {
+      logout();
+      window.location.href = '../index.html';
+    });
+
+    // Mobile sidebar toggle
+    document.getElementById('admin-menu-btn').addEventListener('click', () => {
+      document.getElementById('admin-sidebar').classList.toggle('sidebar-open');
+    });
+
+    // Load metrics
+    const metrics = getSalesMetrics();
+    document.getElementById('metric-revenue').textContent = formatCurrency(metrics.totalRevenue);
+    document.getElementById('metric-products').textContent = metrics.totalProducts;
+    document.getElementById('metric-users').textContent = metrics.totalUsers;
+    document.getElementById('metric-active').textContent = metrics.activeUsers;
+
+    // Charts
+    const topProducts = getTopProducts(3);
+    if (topProducts.length > 0) {
+      renderBarChart('top-products-chart',
+        topProducts.map((p, i) => ({
+          label: p.title ? p.title.substring(0, 18) + '...' : 'Producto',
+          value: p.quantity || 0,
+          color: ['#7c3aed', '#ec4899', '#06b6d4'][i] || '#7c3aed'
+        })),
+        { title: 'Unidades Vendidas' }
+      );
+    } else {
+      document.getElementById('top-products-chart').style.display = 'none';
+      document.getElementById('chart-empty-1').style.display = 'block';
+    }
+
+    // Sales by status chart
+    const orders = Store.getOrders();
+    if (orders.length > 0) {
+      const statusCounts = { Pendiente: 0, Enviado: 0, Entregado: 0 };
+      orders.forEach(o => { if (statusCounts[o.status] !== undefined) statusCounts[o.status]++; });
+      renderBarChart('sales-status-chart',
+        [
+          { label: 'Pendiente', value: statusCounts.Pendiente, color: '#f59e0b' },
+          { label: 'Enviado', value: statusCounts.Enviado, color: '#06b6d4' },
+          { label: 'Entregado', value: statusCounts.Entregado, color: '#10b981' }
+        ],
+        { title: 'Cantidad de Órdenes' }
+      );
+    } else {
+      document.getElementById('sales-status-chart').style.display = 'none';
+      document.getElementById('chart-empty-2').style.display = 'block';
+    }
+
+    // Recent orders table
+    const recentOrders = [...orders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+    const tbody = document.getElementById('recent-orders-body');
+
+    if (recentOrders.length === 0) {
+      document.getElementById('recent-orders-table').style.display = 'none';
+      document.getElementById('no-orders').style.display = 'block';
+    } else {
+      tbody.innerHTML = recentOrders.map(order => {
+        const statusClass = order.status === 'Pendiente' ? 'badge-warning' :
+                           order.status === 'Enviado' ? 'badge-info' : 'badge-success';
+        return `<tr>
+          <td>#${(order.id || '').substring(0, 8).toUpperCase()}</td>
+          <td>${order.userName || order.userEmail || 'Cliente'}</td>
+          <td>${formatDate(order.createdAt)}</td>
+          <td>${formatCurrency(order.total)}</td>
+          <td><span class="badge ${statusClass}">${order.status}</span></td>
+        </tr>`;
+      }).join('');
+    }
+  </script>
+</body>
+</html>

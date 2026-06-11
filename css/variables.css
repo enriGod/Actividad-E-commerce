@@ -1,0 +1,230 @@
+/* ============================================================
+   E-Market Design Tokens — variables.css
+   All design tokens live here. Every color, spacing, shadow,
+   and animation value is a CSS custom property so themes and
+   component styles stay in sync effortlessly.
+   ============================================================ */
+
+/* ----------------------------------------------------------
+   Light Theme (default)
+   ---------------------------------------------------------- */
+:root {
+  /* — Brand Colors ---------------------------------------- */
+  --color-primary:          #7c3aed;
+  --color-primary-light:    #8b5cf6;
+  --color-primary-dark:     #6d28d9;
+  --color-primary-50:       #f5f3ff;
+  --color-primary-100:      #ede9fe;
+  --color-primary-200:      #ddd6fe;
+  --color-primary-rgb:      124, 58, 237;
+
+  --color-secondary:        #ec4899;
+  --color-secondary-light:  #f472b6;
+  --color-secondary-dark:   #db2777;
+  --color-secondary-rgb:    236, 72, 153;
+
+  --color-accent:           #06b6d4;
+  --color-accent-light:     #22d3ee;
+  --color-accent-dark:      #0891b2;
+  --color-accent-rgb:       6, 182, 212;
+
+  /* — Semantic Colors ------------------------------------- */
+  --color-success:          #10b981;
+  --color-success-light:    #34d399;
+  --color-success-rgb:      16, 185, 129;
+
+  --color-warning:          #f59e0b;
+  --color-warning-light:    #fbbf24;
+  --color-warning-rgb:      245, 158, 11;
+
+  --color-danger:           #f43f5e;
+  --color-danger-light:     #fb7185;
+  --color-danger-rgb:       244, 63, 94;
+
+  /* — Surface / Background -------------------------------- */
+  --color-bg:               #fafbff;
+  --color-surface:          #ffffff;
+  --color-surface-secondary:#f3f4f8;
+  --color-surface-hover:    #f0edff;
+  --color-surface-rgb:      255, 255, 255;
+
+  /* — Text ------------------------------------------------ */
+  --color-text:             #1e1b4b;
+  --color-text-secondary:   #4b5563;
+  --color-text-muted:       #9ca3af;
+  --color-text-inverse:     #f1f0ff;
+  --color-text-rgb:         30, 27, 75;
+
+  /* — Borders --------------------------------------------- */
+  --color-border:           #e5e7eb;
+  --color-border-light:     #f3f4f6;
+  --color-border-focus:     var(--color-primary);
+
+  /* — Gradients ------------------------------------------- */
+  --gradient-primary:       linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
+  --gradient-primary-hover: linear-gradient(135deg, #6d28d9 0%, #db2777 100%);
+  --gradient-accent:        linear-gradient(135deg, #06b6d4 0%, #7c3aed 100%);
+  --gradient-warm:          linear-gradient(135deg, #ec4899 0%, #f97316 100%);
+  --gradient-hero:          linear-gradient(135deg, #1e1b4b 0%, #4c1d95 40%, #7c3aed 100%);
+  --gradient-subtle:        linear-gradient(135deg, rgba(124,58,237,.06) 0%, rgba(236,72,153,.06) 100%);
+  --gradient-surface:       linear-gradient(180deg, var(--color-bg) 0%, var(--color-surface) 100%);
+
+  /* — Typography Scale ------------------------------------ */
+  --font-family:            'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-xs:                0.75rem;    /* 12px */
+  --font-sm:                0.875rem;   /* 14px */
+  --font-base:              1rem;       /* 16px */
+  --font-lg:                1.125rem;   /* 18px */
+  --font-xl:                1.25rem;    /* 20px */
+  --font-2xl:               1.5rem;     /* 24px */
+  --font-3xl:               1.875rem;   /* 30px */
+  --font-4xl:               2.25rem;    /* 36px */
+  --font-5xl:               3rem;       /* 48px */
+
+  --line-height-tight:      1.25;
+  --line-height-normal:     1.5;
+  --line-height-relaxed:    1.75;
+
+  --font-weight-regular:    400;
+  --font-weight-medium:     500;
+  --font-weight-semibold:   600;
+  --font-weight-bold:       700;
+
+  /* — Spacing Scale --------------------------------------- */
+  --space-1:   0.25rem;   /*  4px */
+  --space-2:   0.5rem;    /*  8px */
+  --space-3:   0.75rem;   /* 12px */
+  --space-4:   1rem;      /* 16px */
+  --space-5:   1.25rem;   /* 20px */
+  --space-6:   1.5rem;    /* 24px */
+  --space-8:   2rem;      /* 32px */
+  --space-10:  2.5rem;    /* 40px */
+  --space-12:  3rem;      /* 48px */
+  --space-14:  3.5rem;    /* 56px */
+  --space-16:  4rem;      /* 64px */
+  --space-20:  5rem;      /* 80px */
+  --space-24:  6rem;      /* 96px */
+
+  /* — Border Radius --------------------------------------- */
+  --radius-sm:    0.375rem;   /*  6px */
+  --radius-md:    0.5rem;     /*  8px */
+  --radius-lg:    0.75rem;    /* 12px */
+  --radius-xl:    1rem;       /* 16px */
+  --radius-2xl:   1.5rem;     /* 24px */
+  --radius-full:  9999px;
+
+  /* — Shadows --------------------------------------------- */
+  --shadow-sm:    0 1px 2px rgba(0, 0, 0, .05);
+  --shadow-md:    0 4px 6px -1px rgba(0, 0, 0, .07), 0 2px 4px -2px rgba(0, 0, 0, .05);
+  --shadow-lg:    0 10px 15px -3px rgba(0, 0, 0, .08), 0 4px 6px -4px rgba(0, 0, 0, .04);
+  --shadow-xl:    0 20px 25px -5px rgba(0, 0, 0, .1), 0 8px 10px -6px rgba(0, 0, 0, .04);
+  --shadow-2xl:   0 25px 50px -12px rgba(0, 0, 0, .2);
+  --shadow-glow-primary:   0 0 20px rgba(var(--color-primary-rgb), .35), 0 0 60px rgba(var(--color-primary-rgb), .15);
+  --shadow-glow-secondary: 0 0 20px rgba(var(--color-secondary-rgb), .35), 0 0 60px rgba(var(--color-secondary-rgb), .15);
+  --shadow-glow-accent:    0 0 20px rgba(var(--color-accent-rgb), .35);
+
+  /* — Transitions ----------------------------------------- */
+  --transition-fast:   150ms cubic-bezier(.4, 0, .2, 1);
+  --transition-normal: 300ms cubic-bezier(.4, 0, .2, 1);
+  --transition-slow:   500ms cubic-bezier(.4, 0, .2, 1);
+  --transition-bounce: 500ms cubic-bezier(.34, 1.56, .64, 1);
+
+  /* — Z-Index Scale --------------------------------------- */
+  --z-base:       1;
+  --z-dropdown:   100;
+  --z-sticky:     200;
+  --z-navbar:     300;
+  --z-overlay:    400;
+  --z-modal:      500;
+  --z-toast:      600;
+  --z-tooltip:    700;
+
+  /* — Glassmorphism --------------------------------------- */
+  --glass-blur:         12px;
+  --glass-blur-heavy:   24px;
+  --glass-bg:           rgba(255, 255, 255, .72);
+  --glass-bg-heavy:     rgba(255, 255, 255, .85);
+  --glass-border:       rgba(255, 255, 255, .3);
+  --glass-shadow:       0 8px 32px rgba(0, 0, 0, .08);
+
+  /* — Misc ------------------------------------------------ */
+  --navbar-height:      72px;
+  --sidebar-width:      260px;
+  --content-max-width:  1200px;
+}
+
+/* ----------------------------------------------------------
+   Dark Theme
+   ---------------------------------------------------------- */
+[data-theme='dark'] {
+  /* — Brand Colors ---------------------------------------- */
+  --color-primary:          #a78bfa;
+  --color-primary-light:    #c4b5fd;
+  --color-primary-dark:     #8b5cf6;
+  --color-primary-50:       #1a1432;
+  --color-primary-100:      #221a4a;
+  --color-primary-200:      #2e2260;
+  --color-primary-rgb:      167, 139, 250;
+
+  --color-secondary:        #f472b6;
+  --color-secondary-light:  #f9a8d4;
+  --color-secondary-dark:   #ec4899;
+  --color-secondary-rgb:    244, 114, 182;
+
+  --color-accent:           #22d3ee;
+  --color-accent-light:     #67e8f9;
+  --color-accent-dark:      #06b6d4;
+  --color-accent-rgb:       34, 211, 238;
+
+  /* — Semantic Colors ------------------------------------- */
+  --color-success:          #34d399;
+  --color-success-light:    #6ee7b7;
+  --color-success-rgb:      52, 211, 153;
+
+  --color-warning:          #fbbf24;
+  --color-warning-light:    #fcd34d;
+  --color-warning-rgb:      251, 191, 36;
+
+  --color-danger:           #fb7185;
+  --color-danger-light:     #fda4af;
+  --color-danger-rgb:       251, 113, 133;
+
+  /* — Surface / Background -------------------------------- */
+  --color-bg:               #0f0b1a;
+  --color-surface:          #1a1432;
+  --color-surface-secondary:#221a4a;
+  --color-surface-hover:    #2e2260;
+  --color-surface-rgb:      26, 20, 50;
+
+  /* — Text ------------------------------------------------ */
+  --color-text:             #f1f0ff;
+  --color-text-secondary:   #c4b5fd;
+  --color-text-muted:       #7c73a8;
+  --color-text-inverse:     #1e1b4b;
+  --color-text-rgb:         241, 240, 255;
+
+  /* — Borders --------------------------------------------- */
+  --color-border:           #2e2260;
+  --color-border-light:     #221a4a;
+  --color-border-focus:     var(--color-primary);
+
+  /* — Gradients ------------------------------------------- */
+  --gradient-hero:          linear-gradient(135deg, #0f0b1a 0%, #1a1432 40%, #4c1d95 100%);
+  --gradient-subtle:        linear-gradient(135deg, rgba(167,139,250,.08) 0%, rgba(244,114,182,.08) 100%);
+  --gradient-surface:       linear-gradient(180deg, var(--color-bg) 0%, var(--color-surface) 100%);
+
+  /* — Shadows --------------------------------------------- */
+  --shadow-sm:    0 1px 2px rgba(0, 0, 0, .3);
+  --shadow-md:    0 4px 6px -1px rgba(0, 0, 0, .4), 0 2px 4px -2px rgba(0, 0, 0, .3);
+  --shadow-lg:    0 10px 15px -3px rgba(0, 0, 0, .45), 0 4px 6px -4px rgba(0, 0, 0, .3);
+  --shadow-xl:    0 20px 25px -5px rgba(0, 0, 0, .5), 0 8px 10px -6px rgba(0, 0, 0, .3);
+  --shadow-2xl:   0 25px 50px -12px rgba(0, 0, 0, .6);
+
+  /* — Glassmorphism --------------------------------------- */
+  --glass-blur:         14px;
+  --glass-blur-heavy:   28px;
+  --glass-bg:           rgba(26, 20, 50, .72);
+  --glass-bg-heavy:     rgba(26, 20, 50, .88);
+  --glass-border:       rgba(167, 139, 250, .15);
+  --glass-shadow:       0 8px 32px rgba(0, 0, 0, .35);
+}

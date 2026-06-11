@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <title>Catálogo — E-Market</title>
+  <meta name="description" content="Explora nuestro catálogo completo de productos exclusivos en E-Market">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/pages.css">
+  <link rel="manifest" href="../manifest.json">
+  <script>
+    {
+      const t = localStorage.getItem('emarket_theme');
+      if (t) document.documentElement.setAttribute('data-theme', t);
+      else if (window.matchMedia('(prefers-color-scheme: dark)').matches)
+        document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  </script>
+</head>
+<body>
+  <!-- Navbar -->
+  <header class="navbar" id="main-navbar">
+    <div class="navbar-container">
+      <a href="../index.html" class="navbar-brand">
+        <span class="brand-icon">🛒</span>
+        <span class="brand-text">E-Market</span>
+      </a>
+      <nav class="navbar-nav" id="main-nav">
+        <a href="../index.html" class="nav-link">Inicio</a>
+        <a href="catalog.html" class="nav-link active">Catálogo</a>
+        <a href="cart.html" class="nav-link nav-cart">
+          🛍️ Carrito <span class="cart-badge" id="cart-badge">0</span>
+        </a>
+      </nav>
+      <div class="navbar-actions">
+        <button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema">
+          <span class="theme-icon">🌙</span>
+        </button>
+        <div class="user-menu" id="user-menu">
+          <button class="user-menu-btn" id="user-menu-btn">👤</button>
+          <div class="user-dropdown" id="user-dropdown"></div>
+        </div>
+        <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menú">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="page-content">
+    <div class="container">
+      <div class="catalog-header animate-fade-in">
+        <h1 class="section-title">Nuestro Catálogo</h1>
+        <p class="section-subtitle">Encuentra lo que buscas entre nuestra selección exclusiva</p>
+      </div>
+
+      <div class="catalog-layout">
+        <!-- Sidebar Filters -->
+        <aside class="catalog-sidebar" id="catalog-sidebar">
+          <div class="sidebar-header">
+            <h3>Filtros</h3>
+            <button class="btn btn-sm btn-secondary" id="clear-filters">Limpiar</button>
+          </div>
+
+          <!-- Search -->
+          <div class="filter-group">
+            <label class="filter-label">🔍 Buscar</label>
+            <input type="search" class="input search-bar" id="search-input" placeholder="Buscar productos...">
+          </div>
+
+          <!-- Categories -->
+          <div class="filter-group">
+            <label class="filter-label">📂 Categorías</label>
+            <div class="category-chips" id="category-filters">
+              <!-- JS populates -->
+            </div>
+          </div>
+
+          <!-- Price Range -->
+          <div class="filter-group">
+            <label class="filter-label">💰 Rango de Precio</label>
+            <div class="price-range">
+              <input type="number" class="input" id="price-min" placeholder="Mín" min="0" step="0.01">
+              <span class="price-separator">—</span>
+              <input type="number" class="input" id="price-max" placeholder="Máx" min="0" step="0.01">
+            </div>
+            <button class="btn btn-sm btn-primary" id="apply-price" style="margin-top:0.5rem;width:100%">Aplicar</button>
+          </div>
+        </aside>
+
+        <!-- Products Area -->
+        <section class="catalog-main">
+          <!-- Top Bar -->
+          <div class="catalog-toolbar">
+            <button class="btn btn-secondary btn-sm filter-toggle" id="filter-toggle">
+              ⚙️ Filtros
+            </button>
+            <span class="results-count" id="results-count">Cargando...</span>
+            <select class="select sort-select" id="sort-select">
+              <option value="relevant">Más relevantes</option>
+              <option value="price-asc">Precio: menor a mayor</option>
+              <option value="price-desc">Precio: mayor a menor</option>
+              <option value="name-asc">Nombre A-Z</option>
+              <option value="name-desc">Nombre Z-A</option>
+              <option value="rating">Mejor calificados</option>
+            </select>
+          </div>
+
+          <!-- Product Grid -->
+          <div class="catalog-grid" id="product-grid">
+            <!-- Skeleton loaders -->
+            <div class="card card-product skeleton-card"><div class="skeleton" style="height:200px"></div><div style="padding:1rem"><div class="skeleton" style="height:20px;margin-bottom:0.5rem"></div><div class="skeleton" style="height:16px;width:60%"></div></div></div>
+            <div class="card card-product skeleton-card"><div class="skeleton" style="height:200px"></div><div style="padding:1rem"><div class="skeleton" style="height:20px;margin-bottom:0.5rem"></div><div class="skeleton" style="height:16px;width:60%"></div></div></div>
+            <div class="card card-product skeleton-card"><div class="skeleton" style="height:200px"></div><div style="padding:1rem"><div class="skeleton" style="height:20px;margin-bottom:0.5rem"></div><div class="skeleton" style="height:16px;width:60%"></div></div></div>
+            <div class="card card-product skeleton-card"><div class="skeleton" style="height:200px"></div><div style="padding:1rem"><div class="skeleton" style="height:20px;margin-bottom:0.5rem"></div><div class="skeleton" style="height:16px;width:60%"></div></div></div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer" id="main-footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <span class="brand-icon">🛒</span>
+        <span class="brand-text">E-Market</span>
+        <p class="footer-tagline">Tu tienda premium online</p>
+      </div>
+      <div class="footer-links">
+        <h4>Navegación</h4>
+        <a href="../index.html">Inicio</a>
+        <a href="catalog.html">Catálogo</a>
+        <a href="cart.html">Carrito</a>
+      </div>
+      <div class="footer-links">
+        <h4>Legal</h4>
+        <a href="#">Política de Privacidad</a>
+        <a href="#">Términos y Condiciones</a>
+      </div>
+      <div class="footer-social">
+        <h4>Síguenos</h4>
+        <div class="social-icons">
+          <a href="#" aria-label="Facebook">📘</a>
+          <a href="#" aria-label="Instagram">📷</a>
+          <a href="#" aria-label="Twitter">🐦</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 E-Market. Todos los derechos reservados.</p>
+      <div class="connection-status" id="connection-status">
+        <span class="status-dot online"></span>
+        <span class="status-text">Online</span>
+      </div>
+    </div>
+  </footer>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <script type="module">
+    import { initTheme } from '../js/theme.js';
+    import { updateCartBadge, updateUserMenu } from '../js/auth.js';
+    import { initOfflineDetection } from '../js/offline.js';
+    import { initializeProducts } from '../js/api.js';
+    import { Store } from '../js/store.js';
+    import { renderProductCard, filterProducts, sortProducts, getCategories } from '../js/products.js';
+    import { addToCart } from '../js/cart.js';
+    import { debounce } from '../js/utils.js';
+
+    initTheme();
+    updateUserMenu();
+    updateCartBadge();
+    initOfflineDetection();
+
+    let allProducts = [];
+    let currentFilters = { category: null, minPrice: null, maxPrice: null, search: '' };
+    let currentSort = 'rating-desc';
+
+    async function init() {
+      await initializeProducts();
+      allProducts = Store.getProducts();
+      renderCategories();
+      applyFiltersAndRender();
+    }
+
+    function renderCategories() {
+      const categories = getCategories(allProducts);
+      const container = document.getElementById('category-filters');
+      container.innerHTML = '<button class="chip chip-active" data-category="all">Todos</button>' +
+        categories.map(c => '<button class="chip" data-category="' + c + '">' + c.charAt(0).toUpperCase() + c.slice(1) + '</button>').join('');
+      container.addEventListener('click', (e) => {
+        const chip = e.target.closest('.chip');
+        if (!chip) return;
+        container.querySelectorAll('.chip').forEach(c => c.classList.remove('chip-active'));
+        chip.classList.add('chip-active');
+        currentFilters.category = chip.dataset.category === 'all' ? null : chip.dataset.category;
+        applyFiltersAndRender();
+      });
+    }
+
+    function applyFiltersAndRender() {
+      let filtered = filterProducts(allProducts, currentFilters);
+      filtered = sortProducts(filtered, currentSort);
+      const grid = document.getElementById('product-grid');
+      const count = document.getElementById('results-count');
+      count.textContent = filtered.length + ' producto' + (filtered.length !== 1 ? 's' : '');
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '<div class="empty-state"><p style="font-size:3rem">😔</p><h3>No se encontraron productos</h3><p>Intenta con otros filtros</p></div>';
+        return;
+      }
+
+      grid.innerHTML = filtered.map((p, i) =>
+        '<div class="animate-slide-up stagger-' + ((i % 8) + 1) + '">' + renderProductCard(p) + '</div>'
+      ).join('');
+
+      // Add-to-cart handlers
+      grid.querySelectorAll('.btn-add-cart').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const id = parseInt(e.currentTarget.dataset.productId);
+          const product = allProducts.find(p => p.id === id);
+          if (product) { addToCart(product); updateCartBadge(); }
+        });
+      });
+
+      // Product card click → detail
+      grid.querySelectorAll('.card-product').forEach(card => {
+        card.addEventListener('click', (e) => {
+          if (e.target.closest('.btn-add-cart')) return;
+          const id = card.dataset.productId;
+          window.location.href = 'product.html?id=' + id;
+        });
+        card.style.cursor = 'pointer';
+      });
+    }
+
+    // Search with debounce
+    const searchInput = document.getElementById('search-input');
+    searchInput.addEventListener('input', debounce((e) => {
+      currentFilters.search = e.target.value;
+      applyFiltersAndRender();
+    }, 300));
+
+    // Sort
+    document.getElementById('sort-select').addEventListener('change', (e) => {
+      const map = { 'relevant': 'rating-desc', 'price-asc': 'price-asc', 'price-desc': 'price-desc', 'name-asc': 'name-asc', 'name-desc': 'name-desc', 'rating': 'rating-desc' };
+      currentSort = map[e.target.value] || 'rating-desc';
+      applyFiltersAndRender();
+    });
+
+    // Price range
+    document.getElementById('apply-price').addEventListener('click', () => {
+      const min = parseFloat(document.getElementById('price-min').value) || null;
+      const max = parseFloat(document.getElementById('price-max').value) || null;
+      currentFilters.minPrice = min;
+      currentFilters.maxPrice = max;
+      applyFiltersAndRender();
+    });
+
+    // Clear filters
+    document.getElementById('clear-filters').addEventListener('click', () => {
+      currentFilters = { category: null, minPrice: null, maxPrice: null, search: '' };
+      currentSort = 'rating-desc';
+      searchInput.value = '';
+      document.getElementById('price-min').value = '';
+      document.getElementById('price-max').value = '';
+      document.getElementById('sort-select').value = 'relevant';
+      const chips = document.querySelectorAll('.chip');
+      chips.forEach(c => c.classList.remove('chip-active'));
+      if (chips[0]) chips[0].classList.add('chip-active');
+      applyFiltersAndRender();
+    });
+
+    // Mobile filter toggle
+    document.getElementById('filter-toggle').addEventListener('click', () => {
+      document.getElementById('catalog-sidebar').classList.toggle('sidebar-open');
+    });
+
+    // Mobile menu
+    document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+      document.getElementById('main-nav').classList.toggle('nav-open');
+    });
+
+    init();
+  </script>
+</body>
+</html>

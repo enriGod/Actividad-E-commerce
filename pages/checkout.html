@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <title>Checkout — E-Market</title>
+  <meta name="description" content="Finaliza tu compra en E-Market">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/pages.css">
+  <link rel="manifest" href="../manifest.json">
+  <script>
+    {
+      const t = localStorage.getItem('emarket_theme');
+      if (t) document.documentElement.setAttribute('data-theme', t);
+      else if (window.matchMedia('(prefers-color-scheme: dark)').matches)
+        document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  </script>
+</head>
+<body>
+  <!-- Navbar -->
+  <header class="navbar" id="main-navbar">
+    <div class="navbar-container">
+      <a href="../index.html" class="navbar-brand">
+        <span class="brand-icon">🛒</span>
+        <span class="brand-text">E-Market</span>
+      </a>
+      <nav class="navbar-nav" id="main-nav">
+        <a href="../index.html" class="nav-link">Inicio</a>
+        <a href="catalog.html" class="nav-link">Catálogo</a>
+        <a href="cart.html" class="nav-link nav-cart">
+          🛍️ Carrito <span class="cart-badge" id="cart-badge">0</span>
+        </a>
+      </nav>
+      <div class="navbar-actions">
+        <button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema">
+          <span class="theme-icon">🌙</span>
+        </button>
+        <div class="user-menu" id="user-menu">
+          <button class="user-menu-btn" id="user-menu-btn">👤</button>
+          <div class="user-dropdown" id="user-dropdown"></div>
+        </div>
+        <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menú">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="page-content">
+    <div class="container">
+      <!-- Step Indicator -->
+      <div class="step-indicator animate-fade-in">
+        <div class="step step-active" id="step-ind-1"><span class="step-number">1</span><span class="step-label">Resumen</span></div>
+        <div class="step-line"></div>
+        <div class="step" id="step-ind-2"><span class="step-number">2</span><span class="step-label">Envío</span></div>
+        <div class="step-line"></div>
+        <div class="step" id="step-ind-3"><span class="step-number">3</span><span class="step-label">Pago</span></div>
+        <div class="step-line"></div>
+        <div class="step" id="step-ind-4"><span class="step-number">4</span><span class="step-label">Confirmación</span></div>
+      </div>
+
+      <div class="checkout-layout">
+        <!-- Steps Content -->
+        <div class="checkout-main">
+          <!-- Step 1: Order Summary -->
+          <div class="checkout-step card card-glass" id="step-1">
+            <h2>📦 Resumen de tu Pedido</h2>
+            <div class="checkout-items" id="checkout-items"></div>
+            <div class="checkout-actions">
+              <a href="cart.html" class="btn btn-secondary">← Volver al carrito</a>
+              <button class="btn btn-primary" id="to-step-2">Continuar →</button>
+            </div>
+          </div>
+
+          <!-- Step 2: Shipping -->
+          <div class="checkout-step card card-glass" id="step-2" style="display:none">
+            <h2>🚚 Datos de Envío</h2>
+            <form id="shipping-form">
+              <div class="form-group">
+                <label class="form-label">Nombre Completo</label>
+                <input type="text" class="input" id="ship-name" required placeholder="Tu nombre completo">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Dirección de Envío</label>
+                <textarea class="input" id="ship-address" required rows="3" placeholder="Calle, número, ciudad, estado, código postal"></textarea>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Ciudad</label>
+                  <input type="text" class="input" id="ship-city" required placeholder="Ciudad">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Teléfono</label>
+                  <input type="tel" class="input" id="ship-phone" required placeholder="+58 412 1234567">
+                </div>
+              </div>
+              <div class="checkout-actions">
+                <button type="button" class="btn btn-secondary" id="back-to-1">← Volver</button>
+                <button type="submit" class="btn btn-primary">Continuar →</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Step 3: Payment -->
+          <div class="checkout-step card card-glass" id="step-3" style="display:none">
+            <h2>💳 Datos de Pago</h2>
+            <form id="payment-form">
+              <div class="form-group">
+                <label class="form-label">Número de Tarjeta</label>
+                <div class="input-with-icon">
+                  <input type="text" class="input card-input" id="card-number" required placeholder="1234 5678 9012 3456" maxlength="19" autocomplete="cc-number">
+                  <span class="card-type-icon" id="card-type-icon">💳</span>
+                </div>
+                <span class="input-error" id="card-error"></span>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Fecha de Expiración</label>
+                  <input type="text" class="input" id="card-expiry" required placeholder="MM/YY" maxlength="5" autocomplete="cc-exp">
+                  <span class="input-error" id="expiry-error"></span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">CVV</label>
+                  <input type="text" class="input" id="card-cvv" required placeholder="123" maxlength="4" autocomplete="cc-csc">
+                  <span class="input-error" id="cvv-error"></span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Nombre del Titular</label>
+                <input type="text" class="input" id="card-name" required placeholder="Como aparece en la tarjeta" autocomplete="cc-name">
+              </div>
+              <div class="checkout-actions">
+                <button type="button" class="btn btn-secondary" id="back-to-2">← Volver</button>
+                <button type="submit" class="btn btn-primary btn-lg" id="btn-pay">🔒 Pagar <span id="pay-amount"></span></button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Step 4: Confirmation -->
+          <div class="checkout-step card card-glass" id="step-4" style="display:none">
+            <div class="confirmation-content">
+              <div class="success-animation">
+                <div class="checkmark">✓</div>
+              </div>
+              <h2>¡Pedido Realizado! 🎉</h2>
+              <p class="confirmation-msg">Tu pedido ha sido procesado exitosamente.</p>
+              <div class="order-details">
+                <p><strong>Número de Orden:</strong> <span id="order-number"></span></p>
+                <p><strong>Total Pagado:</strong> <span id="order-total"></span></p>
+                <p><strong>Entrega Estimada:</strong> 3-5 días hábiles</p>
+              </div>
+              <div class="confirmation-actions">
+                <a href="profile.html" class="btn btn-primary">Ver mis Pedidos</a>
+                <a href="catalog.html" class="btn btn-secondary">Seguir Comprando</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Summary Sidebar -->
+        <aside class="checkout-sidebar" id="checkout-sidebar">
+          <div class="card card-glass">
+            <h3>Tu Pedido</h3>
+            <div id="sidebar-items"></div>
+            <div class="divider"></div>
+            <div class="summary-row">
+              <span>Subtotal</span>
+              <span id="sidebar-subtotal"></span>
+            </div>
+            <div class="summary-row">
+              <span>Envío</span>
+              <span id="sidebar-shipping"></span>
+            </div>
+            <div class="divider"></div>
+            <div class="summary-row summary-total">
+              <span>Total</span>
+              <span class="price-tag" id="sidebar-total"></span>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer" id="main-footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <span class="brand-icon">🛒</span>
+        <span class="brand-text">E-Market</span>
+        <p class="footer-tagline">Tu tienda premium online</p>
+      </div>
+      <div class="footer-links">
+        <h4>Navegación</h4>
+        <a href="../index.html">Inicio</a>
+        <a href="catalog.html">Catálogo</a>
+        <a href="cart.html">Carrito</a>
+      </div>
+      <div class="footer-links">
+        <h4>Legal</h4>
+        <a href="#">Política de Privacidad</a>
+        <a href="#">Términos y Condiciones</a>
+      </div>
+      <div class="footer-social">
+        <h4>Síguenos</h4>
+        <div class="social-icons">
+          <a href="#" aria-label="Facebook">📘</a>
+          <a href="#" aria-label="Instagram">📷</a>
+          <a href="#" aria-label="Twitter">🐦</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 E-Market. Todos los derechos reservados.</p>
+      <div class="connection-status" id="connection-status">
+        <span class="status-dot online"></span>
+        <span class="status-text">Online</span>
+      </div>
+    </div>
+  </footer>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <script type="module">
+    import { initTheme } from '../js/theme.js';
+    import { updateCartBadge, updateUserMenu, isLoggedIn, getCurrentUser, protectRoute } from '../js/auth.js';
+    import { initOfflineDetection } from '../js/offline.js';
+    import { getCart, getCartTotal, getCartCount, clearCart } from '../js/cart.js';
+    import { Store } from '../js/store.js';
+    import { formatCurrency, sanitizeHTML, showToast, generateId } from '../js/utils.js';
+    import { validateCardNumber, validateExpiry, validateCVV, formatCardNumber, formatExpiry, detectCardType, processOrder } from '../js/checkout.js';
+
+    // Protect route
+    if (!isLoggedIn()) {
+      window.location.href = 'login.html?redirect=checkout';
+    }
+
+    initTheme();
+    updateUserMenu();
+    updateCartBadge();
+    initOfflineDetection();
+
+    const cart = getCart();
+    const user = getCurrentUser();
+    let currentStep = 1;
+    let shippingData = {};
+
+    // Check cart not empty
+    if (cart.length === 0) {
+      showToast('Tu carrito está vacío', 'warning');
+      window.location.href = 'cart.html';
+    }
+
+    // Render order items
+    function renderCheckoutItems() {
+      const total = getCartTotal();
+      const shipping = total > 50 ? 0 : 4.99;
+
+      // Main items
+      document.getElementById('checkout-items').innerHTML = cart.map(item => `
+        <div class="checkout-item">
+          <img src="${sanitizeHTML(item.image)}" alt="${sanitizeHTML(item.title)}" class="checkout-item-img">
+          <div class="checkout-item-info">
+            <p class="checkout-item-name">${sanitizeHTML(item.title)}</p>
+            <p class="checkout-item-qty">Cantidad: ${item.quantity}</p>
+          </div>
+          <p class="checkout-item-price">${formatCurrency(item.price * item.quantity)}</p>
+        </div>
+      `).join('');
+
+      // Sidebar items
+      document.getElementById('sidebar-items').innerHTML = cart.map(item => `
+        <div class="sidebar-item">
+          <span>${sanitizeHTML(item.title).substring(0, 30)}... × ${item.quantity}</span>
+          <span>${formatCurrency(item.price * item.quantity)}</span>
+        </div>
+      `).join('');
+
+      document.getElementById('sidebar-subtotal').textContent = formatCurrency(total);
+      document.getElementById('sidebar-shipping').textContent = shipping === 0 ? 'Gratis 🎉' : formatCurrency(shipping);
+      document.getElementById('sidebar-total').textContent = formatCurrency(total + shipping);
+      document.getElementById('pay-amount').textContent = formatCurrency(total + shipping);
+    }
+
+    // Step navigation
+    function goToStep(step) {
+      for (let i = 1; i <= 4; i++) {
+        document.getElementById('step-' + i).style.display = i === step ? 'block' : 'none';
+        const ind = document.getElementById('step-ind-' + i);
+        ind.classList.remove('step-active', 'step-completed');
+        if (i < step) ind.classList.add('step-completed');
+        if (i === step) ind.classList.add('step-active');
+      }
+      currentStep = step;
+      if (step === 4) {
+        document.getElementById('checkout-sidebar').style.display = 'none';
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Pre-fill shipping
+    if (user) {
+      document.getElementById('ship-name').value = user.name || '';
+      const fullUser = Store.getUsers().find(u => u.id === user.userId);
+      if (fullUser && fullUser.address) {
+        document.getElementById('ship-address').value = fullUser.address;
+      }
+    }
+
+    // Step navigation buttons
+    document.getElementById('to-step-2').addEventListener('click', () => goToStep(2));
+    document.getElementById('back-to-1').addEventListener('click', () => goToStep(1));
+    document.getElementById('back-to-2').addEventListener('click', () => goToStep(2));
+
+    // Shipping form
+    document.getElementById('shipping-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      shippingData = {
+        name: document.getElementById('ship-name').value,
+        address: document.getElementById('ship-address').value,
+        city: document.getElementById('ship-city').value,
+        phone: document.getElementById('ship-phone').value
+      };
+      goToStep(3);
+    });
+
+    // Card formatting
+    document.getElementById('card-number').addEventListener('input', (e) => {
+      let val = e.target.value.replace(/\D/g, '');
+      val = val.replace(/(\d{4})(?=\d)/g, '$1 ');
+      e.target.value = val;
+      // Detect card type
+      const type = detectCardType(val.replace(/\s/g, ''));
+      const icons = { visa: '🟦 Visa', mastercard: '🟠 MC', amex: '🟩 Amex', unknown: '💳' };
+      document.getElementById('card-type-icon').textContent = icons[type] || '💳';
+      document.getElementById('card-error').textContent = '';
+    });
+
+    document.getElementById('card-expiry').addEventListener('input', (e) => {
+      let val = e.target.value.replace(/\D/g, '');
+      if (val.length >= 2) val = val.substring(0, 2) + '/' + val.substring(2);
+      e.target.value = val;
+      document.getElementById('expiry-error').textContent = '';
+    });
+
+    document.getElementById('card-cvv').addEventListener('input', (e) => {
+      e.target.value = e.target.value.replace(/\D/g, '').substring(0, 4);
+      document.getElementById('cvv-error').textContent = '';
+    });
+
+    // Payment form
+    document.getElementById('payment-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const cardNum = document.getElementById('card-number').value.replace(/\s/g, '');
+      const expiry = document.getElementById('card-expiry').value;
+      const cvv = document.getElementById('card-cvv').value;
+      let valid = true;
+
+      if (!validateCardNumber(cardNum)) {
+        document.getElementById('card-error').textContent = 'Número de tarjeta inválido';
+        valid = false;
+      }
+      if (!validateExpiry(expiry)) {
+        document.getElementById('expiry-error').textContent = 'Fecha inválida o expirada';
+        valid = false;
+      }
+      if (!validateCVV(cvv)) {
+        document.getElementById('cvv-error').textContent = 'CVV inválido';
+        valid = false;
+      }
+
+      if (!valid) return;
+
+      // Process order
+      const total = getCartTotal();
+      const shipping = total > 50 ? 0 : 4.99;
+
+      try {
+        const order = await processOrder({
+          userId: user.userId,
+          userName: user.name,
+          userEmail: user.email,
+          items: cart,
+          total: total + shipping,
+          shippingAddress: shippingData,
+          paymentLast4: cardNum.slice(-4)
+        });
+
+        document.getElementById('order-number').textContent = '#' + order.id.substring(0, 8).toUpperCase();
+        document.getElementById('order-total').textContent = formatCurrency(order.total);
+        updateCartBadge();
+        goToStep(4);
+        showToast('¡Pedido realizado exitosamente!', 'success');
+      } catch (err) {
+        showToast('Error al procesar el pedido: ' + err.message, 'error');
+      }
+    });
+
+    // Mobile menu
+    document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+      document.getElementById('main-nav').classList.toggle('nav-open');
+    });
+
+    renderCheckoutItems();
+  </script>
+</body>
+</html>

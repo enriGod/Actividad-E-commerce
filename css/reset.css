@@ -1,0 +1,182 @@
+/* ============================================================
+   E-Market Modern Reset — reset.css
+   Normalises browser defaults so every element starts from a
+   clean, predictable baseline. Also wires up the Inter font,
+   theme-transition smoothing, and accessibility helpers.
+   ============================================================ */
+
+/* — Universal Box-Sizing ---------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* — Document ---------------------------------------------- */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* Prevent layout shift on scrollbar appearance */
+  scrollbar-gutter: stable;
+}
+
+/* — Body -------------------------------------------------- */
+body {
+  font-family: var(--font-family);
+  font-size: var(--font-base);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-normal);
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  min-height: 100vh;
+  /* Smooth background / color transition when toggling themes */
+  transition:
+    background-color var(--transition-normal),
+    color var(--transition-normal);
+}
+
+/* — Typography -------------------------------------------- */
+h1, h2, h3, h4, h5, h6 {
+  line-height: var(--line-height-tight);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  /* Prevent long words from overflowing */
+  overflow-wrap: break-word;
+}
+
+p {
+  line-height: var(--line-height-normal);
+  overflow-wrap: break-word;
+}
+
+/* — Links ------------------------------------------------- */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+a:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* — Lists ------------------------------------------------- */
+ul, ol {
+  list-style: none;
+}
+
+/* — Media ------------------------------------------------- */
+img, picture, video, canvas, svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* — Form Elements ----------------------------------------- */
+input, button, textarea, select {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  outline: none;
+}
+
+button {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+textarea {
+  resize: vertical;
+}
+
+/* — Table ------------------------------------------------- */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* — Misc -------------------------------------------------- */
+fieldset {
+  border: none;
+}
+
+legend {
+  padding: 0;
+}
+
+summary {
+  cursor: pointer;
+}
+
+/* Remove default number-input spinners */
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+/* Remove search decoration */
+input[type='search']::-webkit-search-decoration,
+input[type='search']::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+
+/* — Selection Color --------------------------------------- */
+::selection {
+  background-color: rgba(var(--color-primary-rgb), .25);
+  color: var(--color-text);
+}
+
+/* — Scrollbar Styling ------------------------------------- */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) var(--color-bg);
+}
+
+/* — Focus-visible global ---------------------------------- */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* — Reduced Motion ---------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

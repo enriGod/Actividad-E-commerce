@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <title>Gestión de Ventas — Admin E-Market</title>
+  <meta name="description" content="Administración de ventas E-Market">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/pages.css">
+  <script>
+    {
+      const t = localStorage.getItem('emarket_theme');
+      if (t) document.documentElement.setAttribute('data-theme', t);
+      else if (window.matchMedia('(prefers-color-scheme: dark)').matches)
+        document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  </script>
+</head>
+<body>
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar" id="admin-sidebar">
+      <div class="admin-sidebar-brand">
+        <a href="../index.html">
+          <span class="brand-icon">🛒</span>
+          <span class="brand-text">E-Market</span>
+        </a>
+        <span class="badge badge-admin">Admin</span>
+      </div>
+      <nav class="admin-nav">
+        <a href="admin-dashboard.html" class="admin-nav-link" id="nav-dashboard">
+          📊 <span>Dashboard</span>
+        </a>
+        <a href="admin-products.html" class="admin-nav-link" id="nav-products">
+          📦 <span>Productos</span>
+        </a>
+        <a href="admin-sales.html" class="admin-nav-link admin-nav-active" id="nav-sales">
+          💰 <span>Ventas</span>
+        </a>
+      </nav>
+      <div class="admin-sidebar-footer">
+        <a href="../index.html" class="admin-nav-link">🏠 <span>Ir a Tienda</span></a>
+        <button class="admin-nav-link" id="admin-logout">🚪 <span>Cerrar Sesión</span></button>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="admin-main">
+      <header class="admin-header">
+        <button class="mobile-menu-btn" id="admin-menu-btn">☰</button>
+        <h1 class="admin-title">Gestión de Ventas</h1>
+        <div class="admin-user">
+          <span id="admin-name"></span>
+          <button class="theme-toggle" id="theme-toggle"><span class="theme-icon">🌙</span></button>
+        </div>
+      </header>
+
+      <div class="admin-content">
+        <!-- Filter Bar -->
+        <div class="admin-actions-bar animate-fade-in">
+          <div class="filter-chips" id="status-filters">
+            <button class="chip chip-active" data-status="all">Todos</button>
+            <button class="chip" data-status="Pendiente">🟡 Pendiente</button>
+            <button class="chip" data-status="Enviado">🔵 Enviado</button>
+            <button class="chip" data-status="Entregado">🟢 Entregado</button>
+          </div>
+        </div>
+
+        <!-- Orders Table -->
+        <div class="card animate-slide-up">
+          <div class="table-container">
+            <table class="table" id="orders-table">
+              <thead>
+                <tr>
+                  <th>ID Orden</th>
+                  <th>Cliente</th>
+                  <th>Email</th>
+                  <th>Fecha</th>
+                  <th>Items</th>
+                  <th>Total</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody id="orders-body">
+              </tbody>
+            </table>
+          </div>
+          <p class="empty-state" id="no-orders" style="display:none">
+            <span style="font-size:3rem">📋</span><br>
+            No hay órdenes registradas
+          </p>
+        </div>
+
+        <!-- Order Detail Modal -->
+        <div class="modal-overlay" id="order-detail-modal" style="display:none">
+          <div class="modal">
+            <div class="modal-header">
+              <h2>📦 Detalle de Orden</h2>
+              <button class="btn btn-icon" id="detail-close">✕</button>
+            </div>
+            <div class="modal-body" id="order-detail-content">
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-secondary" id="detail-close-btn">Cerrar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <script type="module">
+    import { protectRoute, getCurrentUser, logout } from '../js/auth.js';
+    import { initTheme } from '../js/theme.js';
+    import { Store } from '../js/store.js';
+    import { updateOrderStatus } from '../js/checkout.js';
+    import { formatCurrency, formatDate, sanitizeHTML, showToast } from '../js/utils.js';
+
+    protectRoute('admin');
+    initTheme();
+
+    const user = getCurrentUser();
+    document.getElementById('admin-name').textContent = user?.name || 'Admin';
+
+    let currentStatusFilter = 'all';
+
+    // Logout
+    document.getElementById('admin-logout').addEventListener('click', () => {
+      logout();
+      window.location.href = '../index.html';
+    });
+
+    // Mobile sidebar
+    document.getElementById('admin-menu-btn').addEventListener('click', () => {
+      document.getElementById('admin-sidebar').classList.toggle('sidebar-open');
+    });
+
+    // Render orders
+    function renderOrders() {
+      let orders = Store.getOrders();
+      orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+      if (currentStatusFilter !== 'all') {
+        orders = orders.filter(o => o.status === currentStatusFilter);
+      }
+
+      const tbody = document.getElementById('orders-body');
+      const noOrders = document.getElementById('no-orders');
+      const table = document.getElementById('orders-table');
+
+      if (orders.length === 0) {
+        tbody.innerHTML = '';
+        table.style.display = 'none';
+        noOrders.style.display = 'block';
+        return;
+      }
+
+      table.style.display = 'table';
+      noOrders.style.display = 'none';
+
+      tbody.innerHTML = orders.map(order => {
+        const itemCount = order.items ? order.items.reduce((sum, i) => sum + (i.quantity || 1), 0) : 0;
+        return `
+          <tr class="order-row" data-order-id="${order.id}">
+            <td><strong>#${(order.id || '').substring(0, 8).toUpperCase()}</strong></td>
+            <td>${sanitizeHTML(order.userName || 'Cliente')}</td>
+            <td>${sanitizeHTML(order.userEmail || '-')}</td>
+            <td>${formatDate(order.createdAt)}</td>
+            <td>${itemCount} artículo${itemCount !== 1 ? 's' : ''}</td>
+            <td><strong>${formatCurrency(order.total)}</strong></td>
+            <td>
+              <select class="status-select status-${order.status.toLowerCase()}" data-order-id="${order.id}">
+                <option value="Pendiente" ${order.status === 'Pendiente' ? 'selected' : ''}>🟡 Pendiente</option>
+                <option value="Enviado" ${order.status === 'Enviado' ? 'selected' : ''}>🔵 Enviado</option>
+                <option value="Entregado" ${order.status === 'Entregado' ? 'selected' : ''}>🟢 Entregado</option>
+              </select>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      // Status change handlers
+      tbody.querySelectorAll('.status-select').forEach(select => {
+        select.addEventListener('change', (e) => {
+          const orderId = e.target.dataset.orderId;
+          const newStatus = e.target.value;
+          updateOrderStatus(orderId, newStatus);
+          showToast('Estado actualizado a: ' + newStatus, 'success');
+          // Update class for styling
+          e.target.className = 'status-select status-' + newStatus.toLowerCase();
+        });
+      });
+
+      // Row click for details
+      tbody.querySelectorAll('.order-row').forEach(row => {
+        row.addEventListener('click', (e) => {
+          if (e.target.closest('.status-select')) return;
+          showOrderDetail(row.dataset.orderId);
+        });
+        row.style.cursor = 'pointer';
+      });
+    }
+
+    // Show order detail modal
+    function showOrderDetail(orderId) {
+      const orders = Store.getOrders();
+      const order = orders.find(o => o.id === orderId);
+      if (!order) return;
+
+      const content = document.getElementById('order-detail-content');
+      content.innerHTML = `
+        <div class="order-detail-info">
+          <p><strong>Orden:</strong> #${order.id.substring(0, 8).toUpperCase()}</p>
+          <p><strong>Cliente:</strong> ${sanitizeHTML(order.userName || 'N/A')}</p>
+          <p><strong>Email:</strong> ${sanitizeHTML(order.userEmail || 'N/A')}</p>
+          <p><strong>Fecha:</strong> ${formatDate(order.createdAt)}</p>
+          <p><strong>Estado:</strong> <span class="badge badge-${order.status === 'Pendiente' ? 'warning' : order.status === 'Enviado' ? 'info' : 'success'}">${order.status}</span></p>
+          ${order.shippingAddress ? `<p><strong>Dirección:</strong> ${sanitizeHTML(typeof order.shippingAddress === 'object' ? (order.shippingAddress.address + ', ' + order.shippingAddress.city) : order.shippingAddress)}</p>` : ''}
+          <p><strong>Últimos 4 dígitos:</strong> ****${order.paymentLast4 || '****'}</p>
+        </div>
+        <div class="divider" style="margin:1rem 0"></div>
+        <h4 style="margin-bottom:0.5rem">Artículos:</h4>
+        <div class="order-items-list">
+          ${(order.items || []).map(item => `
+            <div class="order-item-row">
+              <img src="${sanitizeHTML(item.image || '')}" alt="" style="width:40px;height:40px;object-fit:contain;border-radius:6px;background:var(--color-surface-secondary)">
+              <span>${sanitizeHTML(item.title || 'Producto')}</span>
+              <span>× ${item.quantity || 1}</span>
+              <span>${formatCurrency((item.price || 0) * (item.quantity || 1))}</span>
+            </div>
+          `).join('')}
+        </div>
+        <div class="divider" style="margin:1rem 0"></div>
+        <p class="summary-total" style="text-align:right"><strong>Total: ${formatCurrency(order.total)}</strong></p>
+      `;
+
+      document.getElementById('order-detail-modal').style.display = 'flex';
+    }
+
+    // Close detail modal
+    function closeDetailModal() {
+      document.getElementById('order-detail-modal').style.display = 'none';
+    }
+    document.getElementById('detail-close').addEventListener('click', closeDetailModal);
+    document.getElementById('detail-close-btn').addEventListener('click', closeDetailModal);
+    document.getElementById('order-detail-modal').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) closeDetailModal();
+    });
+
+    // Status filter chips
+    document.getElementById('status-filters').addEventListener('click', (e) => {
+      const chip = e.target.closest('.chip');
+      if (!chip) return;
+      document.querySelectorAll('#status-filters .chip').forEach(c => c.classList.remove('chip-active'));
+      chip.classList.add('chip-active');
+      currentStatusFilter = chip.dataset.status;
+      renderOrders();
+    });
+
+    renderOrders();
+  </script>
+</body>
+</html>
