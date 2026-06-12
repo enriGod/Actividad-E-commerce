@@ -199,8 +199,8 @@ export function sortProducts(products, sortBy) {
  * @returns {string[]}
  */
 export function getCategories(products) {
-  const set = new Set(products.map((p) => p.category));
-  return [...set].sort((a, b) => a.localeCompare(b, 'es'));
+  const set = new Set(products.map((p) => p.category || 'general'));
+  return [...set].sort((a, b) => String(a).localeCompare(String(b), 'es'));
 }
 
 /**

@@ -94,7 +94,7 @@
   </div>
 
   <!-- Product Modal -->
-  <div class="modal-overlay" id="product-modal" style="display:none">
+  <div class="modal-overlay" id="product-modal">
     <div class="modal">
       <div class="modal-header">
         <h2 id="modal-title">Nuevo Producto</h2>
@@ -142,7 +142,7 @@
   </div>
 
   <!-- Delete Confirmation Modal -->
-  <div class="modal-overlay" id="delete-modal" style="display:none">
+  <div class="modal-overlay" id="delete-modal">
     <div class="modal">
       <div class="modal-header">
         <h2>⚠️ Confirmar Eliminación</h2>
@@ -163,228 +163,235 @@
   <div class="toast-container" id="toast-container"></div>
 
   <script type="module">
-    import { protectRoute, getCurrentUser, logout } from '../js/auth.js';
-    import { initTheme } from '../js/theme.js';
-    import { Store } from '../js/store.js';
-    import { addProduct, updateProduct, deleteProduct } from '../js/admin.js';
-    import { getCategories } from '../js/products.js';
-    import { formatCurrency, sanitizeHTML, showToast, debounce } from '../js/utils.js';
+    import { getCurrentUser, logout, protectRoute } from '../js/auth.js?v=3';
+    import { initTheme } from '../js/theme.js?v=3';
+    import { Store } from '../js/store.js?v=3';
+    import { addProduct, updateProduct, deleteProduct } from '../js/admin.js?v=3';
+    import { formatCurrency, sanitizeHTML, showToast, debounce } from '../js/utils.js?v=3';
 
-    protectRoute('admin');
-    initTheme();
+    async function init() {
+      const authorized = protectRoute('admin');
+      if (!authorized) return;
 
-    const user = getCurrentUser();
-    document.getElementById('admin-name').textContent = user?.name || 'Admin';
+      initTheme();
 
-    let editingProductId = null;
-    let deletingProductId = null;
+      const user = getCurrentUser();
+      document.getElementById('admin-name').textContent = user?.name || 'Admin';
 
-    // Logout
-    document.getElementById('admin-logout').addEventListener('click', () => {
-      logout();
-      window.location.href = '../index.html';
-    });
+      let editingProductId = null;
+      let deletingProductId = null;
 
-    // Mobile sidebar
-    document.getElementById('admin-menu-btn').addEventListener('click', () => {
-      document.getElementById('admin-sidebar').classList.toggle('sidebar-open');
-    });
+      // ── Sidebar & Logout ──────────────────────────────────────
+      document.getElementById('admin-logout').addEventListener('click', () => {
+        logout();
+        window.location.href = '../index.html';
+      });
 
-    // Render table
-    function renderProducts(filter = '') {
-      let products = Store.getProducts();
-      if (filter) {
-        const f = filter.toLowerCase();
-        products = products.filter(p =>
-          p.title.toLowerCase().includes(f) ||
-          p.category.toLowerCase().includes(f)
+      document.getElementById('admin-menu-btn').addEventListener('click', () => {
+        document.getElementById('admin-sidebar').classList.toggle('sidebar-open');
+      });
+
+      // ── Modal helpers (pure display, no CSS class tricks) ─────
+      function showModal(id) {
+        const el = document.getElementById(id);
+        el.style.setProperty('display', 'flex', 'important');
+        el.style.setProperty('opacity', '1', 'important');
+        el.style.setProperty('visibility', 'visible', 'important');
+        el.style.setProperty('pointer-events', 'auto', 'important');
+      }
+
+      function hideModal(id) {
+        const el = document.getElementById(id);
+        el.style.setProperty('display', 'none', 'important');
+      }
+
+      // ── Categories ────────────────────────────────────────────
+      function getCategories() {
+        const products = Store.getProducts();
+        const set = new Set(products.map(p => p.category || 'general'));
+        return [...set].sort((a, b) => String(a).localeCompare(String(b), 'es'));
+      }
+
+      function loadCategories() {
+        const select = document.getElementById('form-category');
+        const cats = getCategories();
+        select.innerHTML =
+          '<option value="">Seleccionar categoría</option>' +
+          cats.map(c => `<option value="${c}">${c.charAt(0).toUpperCase() + c.slice(1)}</option>`).join('') +
+          '<option value="__new__">+ Nueva categoría</option>';
+      }
+
+      document.getElementById('form-category').addEventListener('change', e => {
+        const newCatInput = document.getElementById('form-new-category');
+        newCatInput.style.display = e.target.value === '__new__' ? 'block' : 'none';
+        if (e.target.value !== '__new__') newCatInput.value = '';
+      });
+
+      document.getElementById('form-image').addEventListener('input', debounce(e => {
+        const preview = document.getElementById('image-preview');
+        preview.innerHTML = e.target.value
+          ? `<img src="${sanitizeHTML(e.target.value)}" style="max-width:100px;max-height:100px;border-radius:8px;object-fit:contain" onerror="this.style.display='none'">`
+          : '';
+      }, 500));
+
+      // ── Product Table ─────────────────────────────────────────
+      function renderProducts(filter = '') {
+        let products = Store.getProducts();
+        if (filter) {
+          const f = filter.toLowerCase();
+          products = products.filter(p =>
+            p.title.toLowerCase().includes(f) ||
+            p.category.toLowerCase().includes(f)
+          );
+        }
+
+        const tbody = document.getElementById('products-body');
+        const noProducts = document.getElementById('no-products');
+
+        if (products.length === 0) {
+          tbody.innerHTML = '';
+          noProducts.style.display = 'block';
+          return;
+        }
+
+        noProducts.style.display = 'none';
+        tbody.innerHTML = products.map(p => `
+          <tr>
+            <td><img src="${sanitizeHTML(p.image)}" alt="" style="width:50px;height:50px;object-fit:contain;border-radius:8px;background:var(--color-surface-secondary)"></td>
+            <td><strong>${sanitizeHTML(p.title).substring(0, 40)}${p.title.length > 40 ? '...' : ''}</strong></td>
+            <td><span class="chip">${sanitizeHTML(p.category)}</span></td>
+            <td>${formatCurrency(p.price)}</td>
+            <td><span class="badge ${p.stock > 10 ? 'badge-success' : p.stock > 0 ? 'badge-warning' : 'badge-danger'}">${p.stock}</span></td>
+            <td class="table-actions">
+              <button class="btn btn-sm btn-secondary btn-edit" data-id="${p.id}" title="Editar">✏️</button>
+              <button class="btn btn-sm btn-danger btn-delete" data-id="${p.id}" title="Eliminar">🗑️</button>
+            </td>
+          </tr>
+        `).join('');
+
+        tbody.querySelectorAll('.btn-edit').forEach(btn =>
+          btn.addEventListener('click', () => openEditModal(btn.dataset.id))
+        );
+        tbody.querySelectorAll('.btn-delete').forEach(btn =>
+          btn.addEventListener('click', () => openDeleteModal(btn.dataset.id))
         );
       }
 
-      const tbody = document.getElementById('products-body');
-      const noProducts = document.getElementById('no-products');
-
-      if (products.length === 0) {
-        tbody.innerHTML = '';
-        noProducts.style.display = 'block';
-        return;
-      }
-
-      noProducts.style.display = 'none';
-      tbody.innerHTML = products.map(p => `
-        <tr>
-          <td><img src="${sanitizeHTML(p.image)}" alt="" class="table-thumb" style="width:50px;height:50px;object-fit:contain;border-radius:8px;background:var(--color-surface-secondary)"></td>
-          <td><strong>${sanitizeHTML(p.title).substring(0, 40)}${p.title.length > 40 ? '...' : ''}</strong></td>
-          <td><span class="chip">${sanitizeHTML(p.category)}</span></td>
-          <td>${formatCurrency(p.price)}</td>
-          <td><span class="badge ${p.stock > 10 ? 'badge-success' : p.stock > 0 ? 'badge-warning' : 'badge-danger'}">${p.stock}</span></td>
-          <td class="table-actions">
-            <button class="btn btn-sm btn-secondary btn-edit" data-id="${p.id}" title="Editar">✏️</button>
-            <button class="btn btn-sm btn-danger btn-delete" data-id="${p.id}" title="Eliminar">🗑️</button>
-          </td>
-        </tr>
-      `).join('');
-
-      // Edit handlers
-      tbody.querySelectorAll('.btn-edit').forEach(btn => {
-       btn.addEventListener('click', () => openEditModal(btn.dataset.id));
+      // ── Add Product Modal ─────────────────────────────────────
+      document.getElementById('btn-add-product').addEventListener('click', () => {
+        editingProductId = null;
+        document.getElementById('modal-title').textContent = 'Nuevo Producto';
+        document.getElementById('product-form').reset();
+        document.getElementById('image-preview').innerHTML = '';
+        document.getElementById('form-new-category').style.display = 'none';
+        loadCategories();
+        showModal('product-modal');
       });
 
-      // Delete handlers
-      tbody.querySelectorAll('.btn-delete').forEach(btn => {
-       btn.addEventListener('click', () => openDeleteModal(btn.dataset.id));
+      // ── Edit Product Modal ────────────────────────────────────
+      function openEditModal(id) {
+        const product = Store.getProducts().find(p => String(p.id) === String(id));
+        if (!product) return;
+
+        editingProductId = id;
+        document.getElementById('modal-title').textContent = 'Editar Producto';
+        document.getElementById('form-name').value = product.title;
+        document.getElementById('form-desc').value = product.description;
+        document.getElementById('form-price').value = product.price;
+        document.getElementById('form-stock').value = product.stock;
+        document.getElementById('form-image').value = product.image || '';
+        document.getElementById('form-new-category').style.display = 'none';
+
+        loadCategories();
+        document.getElementById('form-category').value = product.category;
+
+        document.getElementById('image-preview').innerHTML = product.image
+          ? `<img src="${sanitizeHTML(product.image)}" style="max-width:100px;max-height:100px;border-radius:8px;object-fit:contain">`
+          : '';
+
+        showModal('product-modal');
+      }
+
+      function closeModal() {
+        hideModal('product-modal');
+        editingProductId = null;
+      }
+
+      document.getElementById('modal-close').addEventListener('click', closeModal);
+      document.getElementById('modal-cancel').addEventListener('click', closeModal);
+      document.getElementById('product-modal').addEventListener('click', e => {
+        if (e.target === e.currentTarget) closeModal();
       });
-    }
 
-    // Category dropdown
-    function loadCategories() {
-      const products = Store.getProducts();
-      const categories = getCategories(products);
-      const select = document.getElementById('form-category');
-      select.innerHTML = '<option value="">Seleccionar categoría</option>' +
-        categories.map(c => '<option value="' + c + '">' + c.charAt(0).toUpperCase() + c.slice(1) + '</option>').join('') +
-        '<option value="__new__">+ Nueva categoría</option>';
-    }
+      // ── Save Product ──────────────────────────────────────────
+      document.getElementById('modal-save').addEventListener('click', () => {
+        const name     = document.getElementById('form-name').value.trim();
+        const desc     = document.getElementById('form-desc').value.trim();
+        const price    = parseFloat(document.getElementById('form-price').value);
+        const stock    = parseInt(document.getElementById('form-stock').value, 10);
+        const image    = document.getElementById('form-image').value.trim();
+        let   category = document.getElementById('form-category').value;
 
-    document.getElementById('form-category').addEventListener('change', (e) => {
-      const newCatInput = document.getElementById('form-new-category');
-      newCatInput.style.display = e.target.value === '__new__' ? 'block' : 'none';
-      if (e.target.value !== '__new__') newCatInput.value = '';
-    });
+        if (category === '__new__') {
+          category = document.getElementById('form-new-category').value.trim().toLowerCase();
+        }
 
-    // Image preview
-    document.getElementById('form-image').addEventListener('input', debounce((e) => {
-      const preview = document.getElementById('image-preview');
-      if (e.target.value) {
-        preview.innerHTML = '<img src="' + sanitizeHTML(e.target.value) + '" style="max-width:100px;max-height:100px;border-radius:8px;object-fit:contain" onerror="this.style.display=\'none\'">';
-      } else {
-        preview.innerHTML = '';
-      }
-    }, 500));
+        if (!name || !desc || isNaN(price) || price <= 0 || isNaN(stock) || !category) {
+          showToast('Por favor completa todos los campos requeridos', 'error');
+          return;
+        }
 
-    // Open modal for creating
-    document.getElementById('btn-add-product').addEventListener('click', () => {
-      editingProductId = null;
-      document.getElementById('modal-title').textContent = 'Nuevo Producto';
-      document.getElementById('product-form').reset();
-      document.getElementById('image-preview').innerHTML = '';
-      document.getElementById('form-new-category').style.display = 'none';
-      loadCategories();
-      document.getElementById('product-modal').style.display = 'flex';
-    });
+        const productData = { title: name, description: desc, price, stock, category,
+          image: image || 'https://placehold.co/300x300?text=Sin+Imagen',
+          rating: 0, ratingCount: 0 };
 
-    // Open modal for editing
-    function openEditModal(id) {
-     const product = products.find(p => String(p.id) === String(id));
-      if (!product) return;
+        if (editingProductId) {
+          updateProduct(editingProductId, productData);
+        } else {
+          addProduct(productData);
+        }
 
-      editingProductId = id;
-      document.getElementById('modal-title').textContent = 'Editar Producto';
-      document.getElementById('form-name').value = product.title;
-      document.getElementById('form-desc').value = product.description;
-      document.getElementById('form-price').value = product.price;
-      document.getElementById('form-stock').value = product.stock;
-      document.getElementById('form-image').value = product.image || '';
-      document.getElementById('form-new-category').style.display = 'none';
-
-      loadCategories();
-      document.getElementById('form-category').value = product.category;
-
-      if (product.image) {
-        document.getElementById('image-preview').innerHTML = '<img src="' + sanitizeHTML(product.image) + '" style="max-width:100px;max-height:100px;border-radius:8px;object-fit:contain">';
-      }
-
-      document.getElementById('product-modal').style.display = 'flex';
-    }
-
-    // Close modal
-    function closeModal() {
-      document.getElementById('product-modal').style.display = 'none';
-      editingProductId = null;
-    }
-
-    document.getElementById('modal-close').addEventListener('click', closeModal);
-    document.getElementById('modal-cancel').addEventListener('click', closeModal);
-    document.getElementById('product-modal').addEventListener('click', (e) => {
-      if (e.target === e.currentTarget) closeModal();
-    });
-
-    // Save product
-    document.getElementById('modal-save').addEventListener('click', () => {
-      const name = document.getElementById('form-name').value.trim();
-      const desc = document.getElementById('form-desc').value.trim();
-      const price = parseFloat(document.getElementById('form-price').value);
-      const stock = parseInt(document.getElementById('form-stock').value);
-      let category = document.getElementById('form-category').value;
-      const image = document.getElementById('form-image').value.trim();
-
-      if (category === '__new__') {
-        category = document.getElementById('form-new-category').value.trim().toLowerCase();
-      }
-
-      if (!name || !desc || !price || isNaN(stock) || !category) {
-        showToast('Por favor completa todos los campos requeridos', 'error');
-        return;
-      }
-
-      const productData = {
-        title: name,
-        description: desc,
-        price: price,
-        stock: stock,
-        category: category,
-        image: image || 'https://via.placeholder.com/300x300?text=Sin+Imagen',
-        rating: 0,
-        ratingCount: 0
-      };
-
-      if (editingProductId) {
-        updateProduct(editingProductId, productData);
-        showToast('Producto actualizado exitosamente', 'success');
-      } else {
-        addProduct(productData);
-        showToast('Producto creado exitosamente', 'success');
-      }
-
-      closeModal();
-      renderProducts();
-    });
-
-    // Delete modal
-    function openDeleteModal(id) {
-     const product = products.find(p => String(p.id) === String(id));
-      if (!product) return;
-      deletingProductId = id;
-      document.getElementById('delete-product-name').textContent = product.title;
-      document.getElementById('delete-modal').style.display = 'flex';
-    }
-
-    function closeDeleteModal() {
-      document.getElementById('delete-modal').style.display = 'none';
-      deletingProductId = null;
-    }
-
-    document.getElementById('delete-close').addEventListener('click', closeDeleteModal);
-    document.getElementById('delete-cancel').addEventListener('click', closeDeleteModal);
-    document.getElementById('delete-modal').addEventListener('click', (e) => {
-      if (e.target === e.currentTarget) closeDeleteModal();
-    });
-
-    document.getElementById('delete-confirm').addEventListener('click', () => {
-      if (deletingProductId) {
-        deleteProduct(deletingProductId);
-        showToast('Producto eliminado', 'info');
-        closeDeleteModal();
+        closeModal();
         renderProducts();
+      });
+
+      // ── Delete Modal ──────────────────────────────────────────
+      function openDeleteModal(id) {
+        const product = Store.getProducts().find(p => String(p.id) === String(id));
+        if (!product) return;
+        deletingProductId = id;
+        document.getElementById('delete-product-name').textContent = product.title;
+        showModal('delete-modal');
       }
-    });
 
-    // Search
-    document.getElementById('product-search').addEventListener('input', debounce((e) => {
-      renderProducts(e.target.value);
-    }, 300));
+      function closeDeleteModal() {
+        hideModal('delete-modal');
+        deletingProductId = null;
+      }
 
-    renderProducts();
+      document.getElementById('delete-close').addEventListener('click', closeDeleteModal);
+      document.getElementById('delete-cancel').addEventListener('click', closeDeleteModal);
+      document.getElementById('delete-modal').addEventListener('click', e => {
+        if (e.target === e.currentTarget) closeDeleteModal();
+      });
+
+      document.getElementById('delete-confirm').addEventListener('click', () => {
+        if (deletingProductId) {
+          deleteProduct(deletingProductId);
+          closeDeleteModal();
+          renderProducts();
+        }
+      });
+
+      // ── Search ────────────────────────────────────────────────
+      document.getElementById('product-search').addEventListener('input', debounce(e => {
+        renderProducts(e.target.value);
+      }, 300));
+
+      renderProducts();
+    }
+
+    init();
   </script>
 </body>
 </html>

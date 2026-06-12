@@ -99,7 +99,7 @@
         </div>
 
         <!-- Order Detail Modal -->
-        <div class="modal-overlay" id="order-detail-modal" style="display:none">
+        <div class="modal-overlay" id="order-detail-modal">
           <div class="modal">
             <div class="modal-header">
               <h2>📦 Detalle de Orden</h2>
@@ -119,14 +119,15 @@
   <div class="toast-container" id="toast-container"></div>
 
   <script type="module">
-  import { protectRoute, getCurrentUser, logout } from '../js/auth.js';
-  import { initTheme } from '../js/theme.js';
-  import { Store } from '../js/store.js';
-  import { updateOrderStatus } from '../js/checkout.js';
-  import { formatCurrency, formatDate, sanitizeHTML, showToast } from '../js/utils.js';
+  import { protectRoute, getCurrentUser, logout } from '../js/auth.js?v=3';
+  import { initTheme } from '../js/theme.js?v=3';
+  import { Store } from '../js/store.js?v=3';
+  import { updateOrderStatus } from '../js/checkout.js?v=3';
+  import { formatCurrency, formatDate, sanitizeHTML, showToast } from '../js/utils.js?v=3';
 
-  protectRoute('admin');
-  initTheme();
+  function init() {
+    if (!protectRoute('admin')) return;
+    initTheme();
 
     const user = getCurrentUser();
     document.getElementById('admin-name').textContent = user?.name || 'Admin';
@@ -143,6 +144,18 @@
     document.getElementById('admin-menu-btn').addEventListener('click', () => {
       document.getElementById('admin-sidebar').classList.toggle('sidebar-open');
     });
+
+    // Modal helpers
+    function showModal(id) {
+      const el = document.getElementById(id);
+      el.style.setProperty('display', 'flex', 'important');
+      el.style.setProperty('opacity', '1', 'important');
+      el.style.setProperty('visibility', 'visible', 'important');
+      el.style.setProperty('pointer-events', 'auto', 'important');
+    }
+    function hideModal(id) {
+      document.getElementById(id).style.setProperty('display', 'none', 'important');
+    }
 
     // Render orders
     function renderOrders() {
@@ -195,7 +208,6 @@
           const newStatus = e.target.value;
           updateOrderStatus(orderId, newStatus);
           showToast('Estado actualizado a: ' + newStatus, 'success');
-          // Update class for styling
           e.target.className = 'status-select status-' + newStatus.toLowerCase();
         });
       });
@@ -212,8 +224,7 @@
 
     // Show order detail modal
     function showOrderDetail(orderId) {
-      const orders = Store.getOrders();
-      const order = orders.find(o => o.id === orderId);
+      const order = Store.getOrders().find(o => o.id === orderId);
       if (!order) return;
 
       const content = document.getElementById('order-detail-content');
@@ -243,13 +254,11 @@
         <p class="summary-total" style="text-align:right"><strong>Total: ${formatCurrency(order.total)}</strong></p>
       `;
 
-      document.getElementById('order-detail-modal').style.display = 'flex';
+      showModal('order-detail-modal');
     }
 
     // Close detail modal
-    function closeDetailModal() {
-      document.getElementById('order-detail-modal').style.display = 'none';
-    }
+    function closeDetailModal() { hideModal('order-detail-modal'); }
     document.getElementById('detail-close').addEventListener('click', closeDetailModal);
     document.getElementById('detail-close-btn').addEventListener('click', closeDetailModal);
     document.getElementById('order-detail-modal').addEventListener('click', (e) => {
@@ -267,6 +276,10 @@
     });
 
     renderOrders();
+  }
+
+  init();
   </script>
 </body>
 </html>
+

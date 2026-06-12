@@ -1,4 +1,4 @@
-const CACHE_NAME = 'emarket-v8';
+const CACHE_NAME = 'emarket-v10';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -34,60 +34,75 @@ const STATIC_ASSETS = [
 /* ── Install: pre-cache static assets ── */
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS);
-    })
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
   );
   self.skipWaiting();
 });
 
-/* ── Activate: clean old caches ── */
+/* ── Activate: delete old caches ── */
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
-      );
-    })
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+    )
   );
   self.clients.claim();
 });
 
-/* ── Fetch: Cache First for static, Network First for API ── */
+/* ── Fetch ── */
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // API requests: Network First
+  // Only handle GET
+  if (event.request.method !== 'GET') return;
+
+  // External API (FakeStore): Network First with cache fallback
   if (url.hostname === 'fakestoreapi.com') {
     event.respondWith(
       fetch(event.request)
-        .then(response => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-          return response;
+        .then(res => {
+          caches.open(CACHE_NAME).then(c => c.put(event.request, res.clone()));
+          return res;
         })
         .catch(() => caches.match(event.request))
     );
     return;
   }
 
-  // Static assets: Cache First
-  event.respondWith(
-    caches.match(event.request)
-      .then(cached => cached || fetch(event.request)
-        .then(response => {
-          if (response.status === 200) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+  // JS, CSS and HTML files: always Network First so code changes
+  // are visible on the next normal reload (no hard reload needed).
+  // Versioned requests (?v=...) are never cached.
+  const isCode = /\.(js|css|html)$/.test(url.pathname) ||
+                 event.request.mode === 'navigate';
+  const hasVersionParam = url.search.includes('v=');
+
+  if (isCode || hasVersionParam) {
+    event.respondWith(
+      fetch(event.request)
+        .then(res => {
+          // Cache clean (unversioned) responses for offline use
+          if (res.status === 200 && !hasVersionParam) {
+            caches.open(CACHE_NAME).then(c => c.put(event.request, res.clone()));
           }
-          return response;
+          return res;
         })
-      )
-      .catch(() => {
-        // Fallback for navigation requests
-        if (event.request.mode === 'navigate') {
-          return caches.match('/index.html');
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // Images, fonts, etc.: Cache First (rarely changes)
+  event.respondWith(
+    caches.match(event.request).then(cached => {
+      if (cached) return cached;
+      return fetch(event.request).then(res => {
+        if (res.status === 200) {
+          caches.open(CACHE_NAME).then(c => c.put(event.request, res.clone()));
         }
-      })
+        return res;
+      });
+    }).catch(() => {
+      if (event.request.mode === 'navigate') return caches.match('/index.html');
+    })
   );
 });

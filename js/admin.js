@@ -182,7 +182,8 @@ export function renderBarChart(canvasId, data, options = {}) {
   const ctx = canvas.getContext('2d');
   const dpr = window.devicePixelRatio || 1;
   const height = options.height || 320;
-  const width  = canvas.parentElement?.clientWidth || 600;
+  const parentEl = canvas.parentElement;
+  const width  = (parentEl?.clientWidth || parentEl?.getBoundingClientRect().width || canvas.offsetWidth || 500);
 
   // Hi-DPI canvas
   canvas.width  = width * dpr;

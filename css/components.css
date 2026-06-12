@@ -1077,6 +1077,7 @@
   padding: var(--space-4);
   opacity: 0;
   visibility: hidden;
+  pointer-events: none;
   transition: opacity var(--transition-fast),
               visibility var(--transition-fast);
 }
@@ -1084,6 +1085,7 @@
 .modal-overlay.open {
   opacity: 1;
   visibility: visible;
+  pointer-events: auto;
 }
 
 .modal {

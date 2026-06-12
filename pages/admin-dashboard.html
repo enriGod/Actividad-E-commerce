@@ -128,92 +128,100 @@
   <div class="toast-container" id="toast-container"></div>
 
  <script type="module">
-  import { protectRoute, getCurrentUser, logout } from '../js/auth.js';
-  import { initTheme } from '../js/theme.js';
-  import { Store } from '../js/store.js';
-  import { getSalesMetrics, getTopProducts, renderBarChart } from '../js/admin.js';
-  import { formatCurrency, formatDate } from '../js/utils.js';
+  import { protectRoute, getCurrentUser, logout } from '../js/auth.js?v=3';
+  import { initTheme } from '../js/theme.js?v=3';
+  import { Store } from '../js/store.js?v=3';
+  import { getSalesMetrics, getTopProducts, renderBarChart } from '../js/admin.js?v=3';
+  import { formatCurrency, formatDate } from '../js/utils.js?v=3';
 
-  protectRoute('admin');
-  initTheme();
+  function init() {
+    if (!protectRoute('admin')) return;
+    initTheme();
 
-  const user = getCurrentUser();
-  document.getElementById('admin-name').textContent = user?.name || 'Admin';
+    const user = getCurrentUser();
+    document.getElementById('admin-name').textContent = user?.name || 'Admin';
 
-  // Logout
-  document.getElementById('admin-logout').addEventListener('click', () => {
-    logout();
-    window.location.href = '../index.html';
-  });
+    // Logout
+    document.getElementById('admin-logout').addEventListener('click', () => {
+      logout();
+      window.location.href = '../index.html';
+    });
 
-  // Mobile sidebar toggle
-  document.getElementById('admin-menu-btn').addEventListener('click', () => {
-    document.getElementById('admin-sidebar').classList.toggle('sidebar-open');
-  });
+    // Mobile sidebar toggle
+    document.getElementById('admin-menu-btn').addEventListener('click', () => {
+      document.getElementById('admin-sidebar').classList.toggle('sidebar-open');
+    });
 
-  // Load metrics
-  const metrics = getSalesMetrics();
-  document.getElementById('metric-revenue').textContent = formatCurrency(metrics.totalRevenue);
-  document.getElementById('metric-products').textContent = metrics.totalProducts;
-  document.getElementById('metric-users').textContent = metrics.totalUsers;
-  document.getElementById('metric-active').textContent = metrics.activeUsers;
+    // Load metrics
+    const metrics = getSalesMetrics();
+    document.getElementById('metric-revenue').textContent = formatCurrency(metrics.totalRevenue);
+    document.getElementById('metric-products').textContent = metrics.totalProducts;
+    document.getElementById('metric-users').textContent = metrics.totalUsers;
+    document.getElementById('metric-active').textContent = metrics.activeUsers;
 
-  // Charts
-  const topProducts = getTopProducts(3);
-  if (topProducts.length > 0) {
-    renderBarChart('top-products-chart',
-      topProducts.map((p, i) => ({
-        label: p.title ? p.title.substring(0, 18) + '...' : 'Producto',
-        value: p.totalSold || 0, // ✅ CORREGIDO: era p.quantity
-        color: ['#7c3aed', '#ec4899', '#06b6d4'][i] || '#7c3aed'
-      })),
-      { title: 'Unidades Vendidas' }
-    );
-  } else {
-    document.getElementById('top-products-chart').style.display = 'none';
-    document.getElementById('chart-empty-1').style.display = 'block';
+    const orders = Store.getOrders();
+
+    // Charts and recent orders — defer to next frame so canvas has computed dimensions
+    requestAnimationFrame(() => {
+      // Top products chart
+      const topProducts = getTopProducts(3);
+      if (topProducts.length > 0) {
+        renderBarChart('top-products-chart',
+          topProducts.map((p, i) => ({
+            label: p.title ? (p.title.length > 18 ? p.title.substring(0, 18) + '...' : p.title) : 'Producto',
+            value: p.totalSold || 0,
+            color: ['#7c3aed', '#ec4899', '#06b6d4'][i] || '#7c3aed'
+          })),
+          { title: 'Unidades Vendidas' }
+        );
+      } else {
+        document.getElementById('top-products-chart').style.display = 'none';
+        document.getElementById('chart-empty-1').style.display = 'block';
+      }
+
+      // Sales by status chart
+      if (orders.length > 0) {
+        const statusCounts = { Pendiente: 0, Enviado: 0, Entregado: 0 };
+        orders.forEach(o => { if (statusCounts[o.status] !== undefined) statusCounts[o.status]++; });
+        renderBarChart('sales-status-chart',
+          [
+            { label: 'Pendiente', value: statusCounts.Pendiente, color: '#f59e0b' },
+            { label: 'Enviado',   value: statusCounts.Enviado,   color: '#06b6d4' },
+            { label: 'Entregado', value: statusCounts.Entregado, color: '#10b981' }
+          ],
+          { title: 'Cantidad de Órdenes' }
+        );
+      } else {
+        document.getElementById('sales-status-chart').style.display = 'none';
+        document.getElementById('chart-empty-2').style.display = 'block';
+      }
+
+      // Recent orders table
+      const recentOrders = [...orders]
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 5);
+      const tbody = document.getElementById('recent-orders-body');
+
+      if (recentOrders.length === 0) {
+        document.getElementById('recent-orders-table').style.display = 'none';
+        document.getElementById('no-orders').style.display = 'block';
+      } else {
+        tbody.innerHTML = recentOrders.map(order => {
+          const statusClass = order.status === 'Pendiente' ? 'badge-warning' :
+                             order.status === 'Enviado'   ? 'badge-info'    : 'badge-success';
+          return `<tr>
+            <td>#${(order.id || '').substring(0, 8).toUpperCase()}</td>
+            <td>${order.userName || order.userEmail || 'Cliente'}</td>
+            <td>${formatDate(order.createdAt)}</td>
+            <td>${formatCurrency(order.total)}</td>
+            <td><span class="badge ${statusClass}">${order.status}</span></td>
+          </tr>`;
+        }).join('');
+      }
+    });
   }
 
-  // Sales by status chart
-  const orders = Store.getOrders();
-  if (orders.length > 0) {
-    const statusCounts = { Pendiente: 0, Enviado: 0, Entregado: 0 };
-    orders.forEach(o => { if (statusCounts[o.status] !== undefined) statusCounts[o.status]++; });
-    renderBarChart('sales-status-chart',
-      [
-        { label: 'Pendiente', value: statusCounts.Pendiente, color: '#f59e0b' },
-        { label: 'Enviado',   value: statusCounts.Enviado,   color: '#06b6d4' },
-        { label: 'Entregado', value: statusCounts.Entregado, color: '#10b981' }
-      ],
-      { title: 'Cantidad de Órdenes' }
-    );
-  } else {
-    document.getElementById('sales-status-chart').style.display = 'none';
-    document.getElementById('chart-empty-2').style.display = 'block';
-  }
-
-  // Recent orders table
-  const recentOrders = [...orders]
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    .slice(0, 5);
-  const tbody = document.getElementById('recent-orders-body');
-
-  if (recentOrders.length === 0) {
-    document.getElementById('recent-orders-table').style.display = 'none';
-    document.getElementById('no-orders').style.display = 'block';
-  } else {
-    tbody.innerHTML = recentOrders.map(order => {
-      const statusClass = order.status === 'Pendiente' ? 'badge-warning' :
-                         order.status === 'Enviado'   ? 'badge-info'    : 'badge-success';
-      return `<tr>
-        <td>#${(order.id || '').substring(0, 8).toUpperCase()}</td>
-        <td>${order.userName || order.userEmail || 'Cliente'}</td>
-        <td>${formatDate(order.createdAt)}</td>
-        <td>${formatCurrency(order.total)}</td>
-        <td><span class="badge ${statusClass}">${order.status}</span></td>
-      </tr>`;
-    }).join('');
-  }
-</script>
+  init();
+  </script>
 </body>
 </html>
